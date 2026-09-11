@@ -1,0 +1,32 @@
+# Foundation stub (P0) — services will be filled in as each phase lands.
+# Empty/placeholder services now; real images and env vars added per-phase.
+
+version: "3.9"
+
+services:
+  backend:
+    build: ../backend/EASP.Api
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sql-server
+    environment:
+      - ConnectionStrings__Default=Server=sql-server;Database=EaspDb;User Id=sa;Password=Your_password123;TrustServerCertificate=True;
+
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Your_password123
+    ports:
+      - "1433:1433"
+
+  ai-services:
+    build: ../ai-services
+    ports:
+      - "8000:8000"
+
+  # frontend:
+  #   build: ../frontend
+  #   ports:
+  #     - "3000:3000"

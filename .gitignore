@@ -1,0 +1,30 @@
+# Visual Studio / VS Code / .NET
+.vs/
+.vscode/
+*.user
+*.suo
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+.next/
+
+# Logs & temp
+*.log
+.DS_Store
+*.tmp
