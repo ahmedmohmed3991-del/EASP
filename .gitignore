@@ -1,30 +1,12 @@
-# Visual Studio / VS Code / .NET
-.vs/
-.vscode/
-*.user
-*.suo
+# .NET build output
 bin/
 obj/
-[Bb]in/
-[Oo]bj/
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
+# Environment / secrets
+appsettings.Development.json
+appsettings.Production.json
+*.user
 
-# Node / Frontend
-node_modules/
-dist/
-build/
-.next/
-
-# Logs & temp
-*.log
-.DS_Store
-*.tmp
+# IDE
+.vs/
+.vscode/

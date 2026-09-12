@@ -10,6 +10,8 @@
     <!-- EF Core + SQL Server: covers P1 (User/Role), P4 (TokenMapping), P5 (Policy/AuditLog) -->
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8" />
+    <!-- Tools: بيدّيك أوامر dotnet ef migrations add / dotnet ef database update -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8" />
 
     <!-- Identity + JWT auth: covers P1 auth routes -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
