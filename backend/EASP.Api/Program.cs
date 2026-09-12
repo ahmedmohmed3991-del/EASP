@@ -104,10 +104,17 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 // ==========================================
-// P3 & P10: Typed HttpClients (Stubs for upcoming phases)
+// P3: Typed HttpClient for the DLP microservice (T-P03-023)
 // ==========================================
-// builder.Services.AddHttpClient<DlpClient>(c =>
-//     c.BaseAddress = new Uri(builder.Configuration["DlpService:BaseUrl"]!));
+builder.Services.AddHttpClient<IDlpClient, DlpClient>(client =>
+{
+    var baseUrl = builder.Configuration["DlpService:BaseUrl"] ?? "http://dlp-service:8001";
+    if (!baseUrl.EndsWith("/")) baseUrl += "/";
+    client.BaseAddress = new Uri(baseUrl);
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+
+// P10: Typed HttpClient stub for FastAPI AI/Security Engine
 // builder.Services.AddHttpClient<SecurityEngineService>(c =>
 //     c.BaseAddress = new Uri(builder.Configuration["SecurityEngine:BaseUrl"]!));
 
