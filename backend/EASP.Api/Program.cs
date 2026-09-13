@@ -114,6 +114,12 @@ builder.Services.AddHttpClient<IDlpClient, DlpClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(5);
 });
 
+// ==========================================
+// P4: Token Mapping Service & TTL Cleanup Worker (T-P04-027)
+// ==========================================
+builder.Services.AddScoped<ITokenMappingService, TokenMappingService>();
+builder.Services.AddHostedService<TokenMappingCleanupService>();
+
 // P10: Typed HttpClient stub for FastAPI AI/Security Engine
 // builder.Services.AddHttpClient<SecurityEngineService>(c =>
 //     c.BaseAddress = new Uri(builder.Configuration["SecurityEngine:BaseUrl"]!));

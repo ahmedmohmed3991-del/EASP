@@ -15,14 +15,32 @@ public class AppDbContext : IdentityDbContext<User, Role, string>
     {
     }
 
-    // جداول Phase 4/5 (TokenMapping, Policy, AuditLog) هتتضاف هنا
-    // كل ما نوصل لتاسكاتهم — دلوقتي بنركز على Phase 1 بس.
+    // Phase 4 & Phase 5 DbSets (TokenMapping, Policy, AuditLog)
+    public DbSet<TokenMapping> TokenMappings => Set<TokenMapping>();
+    public DbSet<Policy> Policies => Set<Policy>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(builder); // لازم تتنادى الأول عشان جداول Identity تتظبط صح
+        base.OnModelCreating(builder); // Identity table configuration
 
-        // مثال: لو حبينا نضيف قيود إضافية على User لاحقًا، هنا مكانها.
-        // builder.Entity<User>().Property(u => u.FullName).HasMaxLength(200);
+        builder.Entity<TokenMapping>(entity =>
+        {
+            entity.HasIndex(e => e.Token).IsUnique();
+            entity.HasIndex(e => e.ExpiresAt);
+        });
+
+        builder.Entity<Policy>(entity =>
+        {
+            entity.HasIndex(e => e.Name);
+            entity.HasIndex(e => e.Category);
+        });
+
+        builder.Entity<AuditLog>(entity =>
+        {
+            entity.HasIndex(e => e.Timestamp);
+            entity.HasIndex(e => e.Action);
+            entity.HasIndex(e => e.UserId);
+        });
     }
 }
