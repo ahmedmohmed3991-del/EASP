@@ -26,6 +26,31 @@ Evaluated on the full ASVspoof 2019 LA evaluation set (71,237 trials):
 | Accuracy (5,000-sample benchmark) | 91.22% |
 | ROC-AUC (5,000-sample benchmark) | 0.9838 |
 
+## Evaluation Results
+
+
+Evaluated on a 5,000-sample benchmark from the ASVspoof 2019 LA evaluation set:
+
+| Metric | Value |
+| --- | --- |
+| **Accuracy** | 91.22% |
+| **ROC-AUC** | 0.9838 |
+| **EER (Equal Error Rate)** | 5.97% |
+
+### Confusion Matrix (5,000-sample benchmark)
+
+| | Predicted Fake | Predicted Real |
+| --- | --- | --- |
+| **Actual Fake** | 4,074 | 425 |
+| **Actual Real** | 14 | 487 |
+
+**Performance Breakdown:**
+* **True Positives (Fake detected as Fake):** 4,074
+* **False Negatives (Fake detected as Real):** 425
+* **False Positives (Real detected as Fake):** 14
+* **True Negatives (Real detected as Real):** 487
+* **Key Highlight:** The model demonstrates high precision and a very low false positive rate on genuine human voices (only 14 misclassified out of 501 real samples).
+
 ## Files
 
 | File | Description |
