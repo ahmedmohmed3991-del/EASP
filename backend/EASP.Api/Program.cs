@@ -142,9 +142,18 @@ builder.Services.AddHostedService<TokenMappingCleanupService>();
 // ==========================================
 builder.Services.AddScoped<IRiskEngineService, RiskEngineService>();
 
-// P10: Typed HttpClient stub for FastAPI AI/Security Engine
-// builder.Services.AddHttpClient<SecurityEngineService>(c =>
-//     c.BaseAddress = new Uri(builder.Configuration["SecurityEngine:BaseUrl"]!));
+// ==========================================
+// P10: Security Engine Layer — typed HttpClient for FastAPI AI Microservice (T-P10-050)
+// ==========================================
+var aiServiceBaseUrl = builder.Configuration["SecurityEngine:BaseUrl"] ?? "http://localhost:8000";
+if (!aiServiceBaseUrl.EndsWith("/")) aiServiceBaseUrl += "/";
+
+builder.Services.AddHttpClient<ISecurityEngineService, SecurityEngineService>(client =>
+{
+    client.BaseAddress = new Uri(aiServiceBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(60); // Voice processing may take longer
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 // ==========================================
 // Build WebApplication
