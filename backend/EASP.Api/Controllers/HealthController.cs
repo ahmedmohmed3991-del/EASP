@@ -4,6 +4,7 @@ namespace EASP.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Route("health")]
 public class HealthController : ControllerBase
 {
     [HttpGet]

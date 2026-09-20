@@ -115,10 +115,32 @@ builder.Services.AddHttpClient<IDlpClient, DlpClient>(client =>
 });
 
 // ==========================================
+// P2: CORS Configuration (T-P02-014)
+// ==========================================
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
+    ?? new[] { "http://localhost:5173", "http://localhost:3000" };
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("EaspCorsPolicy", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+// ==========================================
 // P4: Token Mapping Service & TTL Cleanup Worker (T-P04-027)
 // ==========================================
 builder.Services.AddScoped<ITokenMappingService, TokenMappingService>();
 builder.Services.AddHostedService<TokenMappingCleanupService>();
+
+// ==========================================
+// P6: Risk Engine Service (T-P06-033, T-P06-034, T-P06-035)
+// ==========================================
+builder.Services.AddScoped<IRiskEngineService, RiskEngineService>();
 
 // P10: Typed HttpClient stub for FastAPI AI/Security Engine
 // builder.Services.AddHttpClient<SecurityEngineService>(c =>
@@ -130,17 +152,21 @@ builder.Services.AddHostedService<TokenMappingCleanupService>();
 var app = builder.Build();
 
 // ==========================================
-// P2: Middleware Pipeline Order (T-P02-016 & T-P02-017)
+// P2: Middleware Pipeline Order (T-P02-014, T-P02-016 & T-P02-017)
 // 1. Global Exception Handling (catches all unhandled downstream errors)
-// 2. Request Logging & Latency Tracking
-// 3. Swagger in Development
-// 4. Https Redirection
-// 5. Authentication (JWT Bearer)
-// 6. Authorization (Role-based policies)
-// 7. Route Endpoint Mapping
+// 2. Enterprise Security Headers (Helmet equivalent - T-P02-014)
+// 3. Request Logging & Latency Tracking (T-P02-017)
+// 4. CORS Allow-List (T-P02-014)
+// 5. Swagger in Development
+// 6. Https Redirection
+// 7. Authentication (JWT Bearer)
+// 8. Authorization (Role-based policies)
+// 9. Route Endpoint Mapping
 // ==========================================
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseCors("EaspCorsPolicy");
 
 if (app.Environment.IsDevelopment())
 {
@@ -168,11 +194,14 @@ using (var scope = app.Services.CreateScope())
     {
         var roleManager = services.GetRequiredService<RoleManager<Role>>();
         await DbSeeder.SeedRolesAsync(roleManager);
+
+        var dbContext = services.GetRequiredService<AppDbContext>();
+        await DbSeeder.SeedDefaultPoliciesAsync(dbContext);
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding default roles.");
+        logger.LogError(ex, "An error occurred while seeding default roles or policies.");
     }
 }
 
