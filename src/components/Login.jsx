@@ -1,27 +1,34 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import API from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
-      const response = await API.post('/api/v1/auth/login', {
+      const response = await API.post('/api/Auth/login', {
         email,
         password,
       });
 
-      console.log('Login success:', response.data);
+      // Store the JWT (Phase 1) and hydrate the user's role via /auth/me
+      // before navigating, so ProtectedRoute/role-aware routing (Phase 11)
+      // has the role available on the dashboard's first render.
+      await login(response.data);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'حدث خطأ أثناء تسجيل الدخول');
+      // The real backend (AuthController) returns errors as { message: "..." },
+      // not { error: "..." }.
+      setError(err.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول');
     }
   };
 

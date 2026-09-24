@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import API from '../services/api';
 
 export default function Register() {
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,10 +16,13 @@ export default function Register() {
     setSuccess('');
 
     try {
-     
-      const response = await API.post('/api/v1/auth/register', {
+      // AuthController.Register requires fullName (400 Bad Request without it).
+      // role is intentionally omitted here so every self-registration defaults
+      // to Employee, per RegisterRequest.Role being optional server-side.
+      const response = await API.post('/api/Auth/register', {
         email,
         password,
+        fullName,
       });
 
       console.log("Register success:", response.data);
@@ -28,8 +32,14 @@ export default function Register() {
         navigate('/');
       }, 1500);
     } catch (err) {
-      
-      setError(err.response?.data?.error || 'حدث خطأ أثناء إنشاء الحساب');
+      // The real backend returns errors as { message: "..." }, and validation
+      // failures (ModelState) as { errors: { Field: ["..."] } } with no top-level
+      // message — surface whichever is present.
+      const data = err.response?.data;
+      const validationMessage = data?.errors
+        ? Object.values(data.errors).flat().join(' ')
+        : null;
+      setError(data?.message || validationMessage || 'حدث خطأ أثناء إنشاء الحساب');
     }
   };
 
@@ -57,6 +67,16 @@ export default function Register() {
         {success && <div style={{ color: '#51cf66', marginBottom: '15px', fontSize: '13px', textAlign: 'center' }}>{success}</div>}
 
         <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div>
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>الاسم الكامل:</label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              style={{ width: '100%', padding: '10px', background: '#222', border: '1px solid #444', color: '#fff', borderRadius: '4px', boxSizing: 'border-box' }}
+            />
+          </div>
           <div>
             <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>البريد الإلكتروني:</label>
             <input 
