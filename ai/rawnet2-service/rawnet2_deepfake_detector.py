@@ -27,27 +27,29 @@ HOW TO USE (for integration, e.g. by the FastAPI/backend team)
 ------------------------------------------------------------------------------
     from rawnet2_deepfake_detector import predict
 
-    result = predict("some_audio_file.wav")
+    result = predict("some_audio_file.m4a")
     print(result)
     # -> {"label": "real", "confidence": 0.97}
 
-The function accepts any common audio format supported by librosa
-(.wav, .flac, .mp3, .m4a, etc.). It automatically resamples to 16kHz
-and pads/trims the audio to match the model's expected input length.
+Supported input formats: .wav, .flac, .mp3, .m4a, .ogg, .opus, ...
+Any non-wav file is first converted to a 16kHz mono wav using ffmpeg
+(this is "Solution 1": convert compressed audio to wav before inference).
+The audio is then padded/trimmed to the model's expected input length.
+
+NOTE: ffmpeg must be installed (Linux: sudo apt install ffmpeg,
+Windows: download ffmpeg and add it to PATH).
 
 ------------------------------------------------------------------------------
-REQUIRED FILES / PATHS (must be adjusted to your environment)
+REQUIRED FILES / PATHS
 ------------------------------------------------------------------------------
-1. RawNet2 source code (model.py + model_config_RawNet.yaml) from:
-   https://github.com/asvspoof-challenge/2021  (LA/Baseline-RawNet2 folder)
-
-2. Trained model weights file: epoch_19.pth
-   (produced by training the RawNet2 baseline on ASVspoof 2019 LA for 20 epochs)
-
-Update the two path variables below (RAWNET_CODE_DIR, MODEL_WEIGHTS_PATH)
-to point to wherever these files live in the deployment environment.
+By default, model.py, model_config_RawNet.yaml and the weights file are
+expected in the SAME folder as this script. To use other locations, set the
+environment variables RAWNET_CODE_DIR and RAWNET_WEIGHTS_PATH, or edit the
+two variables below.
 """
-
+import os
+import subprocess
+import tempfile
 import importlib.util
 import numpy as np
 import torch
@@ -55,12 +57,13 @@ import yaml
 import librosa
 
 # ==============================================================================
-# CONFIGURATION - update these two paths for your environment
+# CONFIGURATION
 # ==============================================================================
-RAWNET_CODE_DIR = "/content/2021/LA/Baseline-RawNet2"          # folder with model.py
-MODEL_WEIGHTS_PATH = (
-    "/content/drive/MyDrive/graduation_project_rawnet2/models/"
-    "model_LA_weighted_CCE_20_24_0.0001_rawnet2_graduation_project/epoch_19.pth"
+_HERE = os.path.dirname(os.path.abspath(__file__))
+
+RAWNET_CODE_DIR = os.environ.get("RAWNET_CODE_DIR", _HERE)   # folder with model.py
+MODEL_WEIGHTS_PATH = os.environ.get(
+    "RAWNET_WEIGHTS_PATH", os.path.join(_HERE, "epoch_19.pth")
 )
 
 SEGMENT_LENGTH = 64600   # 4 seconds at 16kHz sample rate (matches training setup)
@@ -102,11 +105,53 @@ print(f"[rawnet2_deepfake_detector] Model loaded successfully on device: {_devic
 # AUDIO PREPROCESSING
 # ==============================================================================
 
+def _convert_to_wav(audio_path: str) -> str:
+    """Convert any audio format (m4a, ogg, mp3, ...) to a 16kHz mono wav via ffmpeg.
+
+    Returns the path of a temporary wav file (the caller must delete it).
+    """
+    fd, out_path = tempfile.mkstemp(suffix=".wav")
+    os.close(fd)
+    try:
+        subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error", "-i", audio_path,
+             "-ar", str(SAMPLE_RATE), "-ac", "1", out_path],
+            check=True,
+            capture_output=True,
+        )
+    except FileNotFoundError:
+        os.remove(out_path)
+        raise RuntimeError(
+            "ffmpeg is not installed. Install it first "
+            "(Linux: sudo apt install ffmpeg | Windows: add ffmpeg to PATH)."
+        )
+    except subprocess.CalledProcessError as e:
+        os.remove(out_path)
+        raise RuntimeError(
+            f"ffmpeg failed to convert '{audio_path}': "
+            f"{e.stderr.decode(errors='ignore')}"
+        )
+    return out_path
+
+
 def _load_and_pad_audio(audio_path: str) -> np.ndarray:
-    """Load an audio file, resample to 16kHz, and pad/trim to a fixed length."""
-    waveform, _ = librosa.load(audio_path, sr=SAMPLE_RATE)
+    """Convert to wav if needed, load at 16kHz, and pad/trim to a fixed length."""
+    wav_path = audio_path
+    converted = False
+    if not audio_path.lower().endswith(".wav"):
+        wav_path = _convert_to_wav(audio_path)
+        converted = True
+
+    try:
+        waveform, _ = librosa.load(wav_path, sr=SAMPLE_RATE)
+    finally:
+        if converted:
+            os.remove(wav_path)
 
     length = waveform.shape[0]
+    if length == 0:
+        raise ValueError(f"Audio file is empty: {audio_path}")
+
     if length >= SEGMENT_LENGTH:
         waveform = waveform[:SEGMENT_LENGTH]
     else:
@@ -127,7 +172,7 @@ def predict(audio_path: str) -> dict:
     Parameters
     ----------
     audio_path : str
-        Path to the audio file to classify (.wav, .flac, .mp3, etc.)
+        Path to the audio file to classify (.wav, .flac, .mp3, .m4a, .ogg, ...)
 
     Returns
     -------
