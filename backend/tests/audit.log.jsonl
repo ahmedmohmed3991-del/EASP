@@ -1,0 +1,3 @@
+{"action":"LOGIN","user":"alice","result":"success","timestamp":"2026-10-03T13:34:09.090Z","prevHash":"0000000000000000000000000000000000000000000000000000000000000000","hash":"ab39953f64aece7a2ca02872bd71639c16086222b5a7ff1b0ef50fc8ee23247f"}
+{"action":"DLP_SCAN","user":"bob","result":"blocked","timestamp":"2026-10-03T13:34:09.092Z","prevHash":"ab39953f64aece7a2ca02872bd71639c16086222b5a7ff1b0ef50fc8ee23247f","hash":"faf5b43ca9cac7ba3191dbef40c6bf7a5d1a98346b26ac559bd11d5698b55226"}
+{"action":"POLICY_DECISION","user":"carol","result":"escalated","timestamp":"2026-10-03T13:34:09.093Z","prevHash":"faf5b43ca9cac7ba3191dbef40c6bf7a5d1a98346b26ac559bd11d5698b55226","hash":"0137eb56ccaf8295bf17243e335ed14b29dbd4b7866e727e93deed6b246c9181"}
