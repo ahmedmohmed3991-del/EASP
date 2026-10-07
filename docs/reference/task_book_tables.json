@@ -1,0 +1,3326 @@
+[
+  {
+    "table_index": 0,
+    "rows": [
+      [
+        "Document",
+        "Role"
+      ],
+      [
+        "EASP Chapter 1 Final v2.0 (.docx)",
+        "Authoritative academic baseline: scope, architecture, model rules, dataset list"
+      ],
+      [
+        "AI Subsystem Proposal and SRS v2.1",
+        "Referenced by Chapter 1 but not supplied to this session — endpoint-level and latency-per-stage detail from it remains unverified"
+      ],
+      [
+        "EASP_fixed.ipynb",
+        "Implementation evidence / prototype code — mined for the Notebook-to-Production Migration Matrix below"
+      ],
+      [
+        "EASP Implementation Readiness Audit & Roadmap.md (prior session)",
+        "Prior planning artifact; reconciled with this Task Book's 15-phase structure below where the two differ"
+      ]
+    ]
+  },
+  {
+    "table_index": 1,
+    "rows": [
+      [
+        "Track",
+        "Members",
+        "Primary Ownership"
+      ],
+      [
+        "Cybersecurity",
+        "Cyber 1, Cyber 2, Cyber 3, Cyber 4",
+        "Auth/RBAC, DLP/redaction, Risk/Policy engine, Security testing/audit"
+      ],
+      [
+        "AI / Data Science",
+        "AI 1, AI 2, AI 3, AI 4",
+        "RawNet2, Faster-Whisper, mBERT+head, AI integration/FastAPI"
+      ],
+      [
+        "Computer Science",
+        "CS 1, CS 2",
+        "Backend/Express/API integration, Frontend/React/MongoDB/DevOps"
+      ]
+    ]
+  },
+  {
+    "table_index": 2,
+    "rows": [
+      [
+        "Person",
+        "Owns"
+      ],
+      [
+        "Cyber 1",
+        "Authentication, JWT, RBAC"
+      ],
+      [
+        "Cyber 2",
+        "DLP, Data Security, Redaction"
+      ],
+      [
+        "Cyber 3",
+        "Risk Engine, Policy Engine"
+      ],
+      [
+        "Cyber 4",
+        "Security Testing, Audit Security"
+      ],
+      [
+        "AI 1",
+        "RawNet2, Voice Deepfake Detection"
+      ],
+      [
+        "AI 2",
+        "Faster-Whisper, Speech-to-Text"
+      ],
+      [
+        "AI 3",
+        "mBERT, Classification Head, Social Engineering"
+      ],
+      [
+        "AI 4",
+        "AI Integration, FastAPI, Data Science Integration"
+      ],
+      [
+        "CS 1",
+        "Backend, Express, APIs, Integration"
+      ],
+      [
+        "CS 2",
+        "Frontend, React, MongoDB, Docker/DevOps"
+      ]
+    ]
+  },
+  {
+    "table_index": 3,
+    "rows": [
+      [
+        "Rule",
+        "Detail"
+      ],
+      [
+        "Branch per task",
+        "feature/<component>, e.g. feature/dlp-engine, feature/rawnet2-service"
+      ],
+      [
+        "Ownership",
+        "Every task has one named owner (see Person-by-Person Task List, Section 8)"
+      ],
+      [
+        "Merge path",
+        "feature/* -> develop (peer review required) -> main (integration checkpoints only, e.g. end of Phase 12)"
+      ],
+      [
+        "Quality gate",
+        "IMPLEMENT -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT. A task is not complete because code was merely written."
+      ],
+      [
+        "Git checkpoint tags",
+        "phase-00-foundation, phase-01-auth-rbac, ... phase-14-final-demo (one per phase, applied to develop after that phase's acceptance criteria pass)"
+      ]
+    ]
+  },
+  {
+    "table_index": 4,
+    "rows": [
+      [
+        "Notebook Component",
+        "Production Destination",
+        "Owner",
+        "Phase",
+        "Status"
+      ],
+      [
+        "DLP engine (Regex + Presidio + spaCy, ReversibleDLPEngine)",
+        "ai-services/dlp-service/ (Phase 3) + reversible-redaction module (Phase 4)",
+        "Cyber 2 / AI 4",
+        "3-4",
+        "Portable as-is; verify recognizer coverage against real PII test set before reuse"
+      ],
+      [
+        "Custom API-key PatternRecognizer",
+        "ai-services/dlp-service/recognizers.py",
+        "AI 4",
+        "3",
+        "Portable; the notebook's own demo key value must be replaced with a clearly-synthetic fixture, never reused literally"
+      ],
+      [
+        "Reversible redaction / token restore (Fernet)",
+        "backend/src/models/TokenMapping.js + redaction.py",
+        "Cyber 2",
+        "4",
+        "Logic portable; key management must move to KMS/secret manager per the notebook's own Cell 12 warning"
+      ],
+      [
+        "mBERT encoder + classification head",
+        "ai-services/social-engineering-service/model.py",
+        "AI 3",
+        "9",
+        "Portable; head is untrained until Phase 9's training loop runs on the team's own split"
+      ],
+      [
+        "Training loop (class-weighted BCEWithLogitsLoss, pos_weight)",
+        "ai-services/social-engineering-service/train.py",
+        "AI 3",
+        "9",
+        "Portable; verify pos_weight recomputed on the team's actual train split, not reused from the notebook run"
+      ],
+      [
+        "Label mapping (SMS Spam Collection -> 4 multi-labels via regex)",
+        "ai-services/social-engineering-service/label_mapping.py",
+        "AI 3",
+        "9",
+        "Portable, but this is a heuristic proxy label, not ground truth — document as such"
+      ],
+      [
+        "Evaluation (per-label precision/recall/F1)",
+        "tests/ai-evaluation/ (Phase 13), prototyped in Phase 9",
+        "AI 3",
+        "9 / 13",
+        "Portable methodology; numbers must be re-run on the team's own split, not copied from the notebook"
+      ],
+      [
+        "RawNet2 architecture (SincConv, FMS, ResBlock, RawNet2)",
+        "ai-services/voice-deepfake-service/rawnet2.py",
+        "AI 1",
+        "8",
+        "Portable as-is (standard architecture)"
+      ],
+      [
+        "RawNet2VoiceDetector (checkpoint loading)",
+        "ai-services/voice-deepfake-service/main.py",
+        "AI 1",
+        "8",
+        "Portable; requires a real ASVspoof-trained checkpoint, not the notebook's placeholder path"
+      ],
+      [
+        "DummyVoiceDetector (random-score fallback)",
+        "NOT ported to production",
+        "AI 1",
+        "8",
+        "Do not migrate — production must fail loudly on missing weights, never silently return random scores"
+      ],
+      [
+        "Faster-Whisper SpeechTranscriber",
+        "ai-services/whisper-service/main.py",
+        "AI 2",
+        "7",
+        "Portable as-is (pretrained, no fine-tuning)"
+      ],
+      [
+        "AudioProcessor (preprocessing)",
+        "ai-services/whisper-service/audio_processor.py",
+        "AI 2",
+        "7",
+        "Portable as-is"
+      ],
+      [
+        "UnifiedRiskEngine (Phase 1 rule-based fusion)",
+        "backend/src/services/riskEngine.js",
+        "Cyber 3",
+        "6",
+        "Logic portable, but weights (0.40/0.35/0.25) and BLOCK threshold (0.70) are NOT approved values — flag for team/supervisor sign-off before adoption"
+      ],
+      [
+        "Phase 2 ML Risk Engine (XGBoost + SHAP)",
+        "Not built in the 15-phase baseline; conditional follow-on after Phase 13's go/no-go",
+        "AI 4",
+        "13 (decision only)",
+        "Notebook's training data is fully synthetic and circular (labels generated from the same weighted-sum rule the model is meant to learn) — must not be treated as a working model until trained on real analyst-labeled incidents"
+      ],
+      [
+        "FastAPI microservice (EASP_AIService + 3 endpoints)",
+        "ai-services/ai-gateway/ (or consolidated entrypoint)",
+        "AI 4",
+        "10",
+        "The class/wrapper logic is portable; the notebook itself notes an earlier version defined the class but never actually served it over HTTP — verify the production version is genuinely reachable"
+      ],
+      [
+        "Latency benchmarking harness",
+        "tests/ai-evaluation/latency (Phase 13), prototyped Phase 7",
+        "CS 1",
+        "7 / 13",
+        "Methodology portable; notebook numbers are dev-machine, not representative — re-measure in the actual deployment environment"
+      ],
+      [
+        "Voice deepfake evaluation (ASVspoof-style EER/ROC-AUC)",
+        "tests/ai-evaluation/voice-eer (Phase 13)",
+        "AI 1",
+        "8 / 13",
+        "SIMULATED — notebook Cell 14 generates bonafide/spoofed scores from np.random.normal, not a real model run. Must be re-run for real before any number is reported"
+      ],
+      [
+        "Model artifact saving (torch.save, xgboost save_model)",
+        "easp_ai_artifacts/ (per-service, Phases 9/10)",
+        "AI 3 / AI 4",
+        "9 / 10",
+        "Portable pattern; notebook already correctly excludes the Fernet key from this save path — preserve that separation"
+      ],
+      [
+        "Live voice recording / dummy audio generation",
+        "NOT ported — test fixtures only",
+        "AI 1 / QA",
+        "7-8 (test fixtures)",
+        "The notebook's np.random-generated dummy_audio is a smoke-test fixture, not a data source; production testing needs real controlled-environment recordings"
+      ]
+    ]
+  },
+  {
+    "table_index": 5,
+    "rows": [
+      [
+        "Dataset",
+        "Type",
+        "Used By",
+        "Notes"
+      ],
+      [
+        "ASVspoof 2019/2021",
+        "Real / Public",
+        "RawNet2 evaluation (Phase 8, 13)",
+        "Not for training — pretrained checkpoint is baseline; fine-tuning optional"
+      ],
+      [
+        "WaveFake",
+        "Real / Public",
+        "RawNet2 secondary evaluation (Phase 8, 13)",
+        "Supplementary spoofed-speech benchmark"
+      ],
+      [
+        "SMS Spam Collection",
+        "Real / Public",
+        "mBERT+head training via regex proxy-labels (Phase 9)",
+        "Labels are heuristic (regex-derived), not hand-annotated for social engineering"
+      ],
+      [
+        "Enron Email",
+        "Real / Public",
+        "Documented alternate/supplementary corpus for social-engineering/phishing patterns (Phase 9)",
+        "Not used directly in notebook Cell 6's pipeline; available if the team extends labeling"
+      ],
+      [
+        "Public phishing corpora",
+        "Real / Public",
+        "Supplementary social-engineering signal source (Phase 9)",
+        "Source and licensing to be finalized in Phase 0's DATASETS.md"
+      ],
+      [
+        "Synthetic scripted call dialogues",
+        "Team-Generated Synthetic",
+        "Controlled-environment demo scenarios (Phase 7-9, 12, 14)",
+        "For the audio/VoIP demonstration environment, not for training claims"
+      ],
+      [
+        "ai4privacy/pii-masking-200k",
+        "Real / Public",
+        "DLP evaluation sample (Phase 3, 13)",
+        "Evaluation only — Presidio/spaCy are pretrained, not trained on this set"
+      ],
+      [
+        "CoNLL-2003",
+        "Real / Public",
+        "spaCy/NER-adjacent reference benchmark (Phase 3)",
+        "Reference/validation use for the NER component"
+      ],
+      [
+        "Synthetic risk incidents",
+        "Team-Generated Synthetic",
+        "Notebook Cell 9's XGBoost placeholder training data",
+        "FLAGGED: currently circular (labels derived from the same rule the model would learn) — not usable for a real Phase 2 model until replaced with real analyst-labeled incidents"
+      ]
+    ]
+  },
+  {
+    "table_index": 6,
+    "rows": [
+      [
+        "1. Objective",
+        "Establish the monorepo skeleton, tooling, environment baseline, and parallel Data Preparation track. No business logic is written."
+      ],
+      [
+        "2. Why this phase exists",
+        "Every later phase assumes a runnable repo, agreed folder structure, and a Git branching model. Dataset work (Section: Data Science Rule) must also start here rather than waiting for Phase 9/10, since AI phases need labeled data ready when they begin."
+      ],
+      [
+        "3. Prerequisites",
+        "• Team confirms monorepo structure below • Team confirms Docker/docker-compose for Python AI services • GitHub repo created with main/develop branches"
+      ],
+      [
+        "7. Responsible person(s)",
+        "CS 1 (lead), all members (setup buy-in)"
+      ],
+      [
+        "8. Deliverables",
+        "• Empty-but-runnable repo skeleton • .gitignore • README.md • DATASETS.md stub • Git branch policy documented"
+      ],
+      [
+        "9. Files / components",
+        "• EASP/backend/ • EASP/frontend/ • EASP/ai-services/ • EASP/data/{raw,processed,evaluation} • EASP/docs/ • EASP/tests/ • EASP/docker/ • README.md • .gitignore • .env.example"
+      ],
+      [
+        "10. APIs required",
+        "• None"
+      ],
+      [
+        "11. Database changes",
+        "• None"
+      ],
+      [
+        "12. Dataset requirements",
+        "No modeling yet. Start licensing checks and download-availability checks for all 9 documented datasets (see Dataset Plan)."
+      ],
+      [
+        "13. Integration points",
+        "• None yet — this phase produces the container all other phases build into"
+      ],
+      [
+        "14. Testing requirements",
+        "• Smoke test: npm run lint and python -m py_compile succeed on empty scaffolding • docker-compose up boots empty stub services without error"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• Repo clones clean on a fresh machine • Folder structure matches the agreed layout • No secrets committed (verified with a secret scanner) • DATASETS.md lists all 9 datasets with licensing status"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT (scaffold) -> RUN (docker-compose up) -> TEST (lint/smoke) -> FIX -> VERIFY (2nd teammate clones and boots) -> DOCUMENT (README) -> COMMIT to develop."
+      ],
+      [
+        "17. Dependencies",
+        "• None"
+      ],
+      [
+        "18. Risks",
+        "• Team disagreement on monorepo vs multi-repo stalls Phase 0 — Mitigation: Decide by vote in kickoff meeting; monorepo is the default recommendation for a 10-person student team"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Any authentication, DLP, or AI logic • Any real dataset download beyond licensing checks"
+      ]
+    ]
+  },
+  {
+    "table_index": 7,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P00-001",
+        "P0",
+        "Cyber",
+        "Cyber 4",
+        "Set up .env.example with no real secrets + secret-scanning note in README",
+        "Team confirms monorepo structure below",
+        "Empty-but-runnable repo skeleton",
+        "None",
+        "Smoke test: npm run lint and python -m py_compile succeed on empty scaffolding",
+        "Repo clones clean on a fresh machine"
+      ],
+      [
+        "T-P00-002",
+        "P0",
+        "AI",
+        "AI 4",
+        "Create data/raw, data/processed, data/evaluation folders + DATASETS.md tracking sheet",
+        "Team confirms monorepo structure below",
+        "Empty-but-runnable repo skeleton",
+        "None",
+        "Smoke test: npm run lint and python -m py_compile succeed on empty scaffolding",
+        "Repo clones clean on a fresh machine"
+      ],
+      [
+        "T-P00-003",
+        "P0",
+        "AI",
+        "AI 4",
+        "Begin licensing verification for ASVspoof 2019/2021, WaveFake, SMS Spam Collection, Enron Email, ai4privacy/pii-masking-200k, CoNLL-2003",
+        "Team confirms monorepo structure below",
+        "Empty-but-runnable repo skeleton",
+        "None",
+        "Smoke test: npm run lint and python -m py_compile succeed on empty scaffolding",
+        "Repo clones clean on a fresh machine"
+      ],
+      [
+        "T-P00-004",
+        "P0",
+        "CS",
+        "CS 1",
+        "Scaffold backend/, frontend/, ai-services/, data/, docs/, tests/, docker/ folders",
+        "Team confirms monorepo structure below",
+        "Empty-but-runnable repo skeleton",
+        "None",
+        "Smoke test: npm run lint and python -m py_compile succeed on empty scaffolding",
+        "Repo clones clean on a fresh machine"
+      ],
+      [
+        "T-P00-005",
+        "P0",
+        "CS",
+        "CS 2",
+        "Configure linting/formatting (ESLint/Prettier for JS, black/flake8 for Python)",
+        "Team confirms monorepo structure below",
+        "Empty-but-runnable repo skeleton",
+        "None",
+        "Smoke test: npm run lint and python -m py_compile succeed on empty scaffolding",
+        "Repo clones clean on a fresh machine"
+      ],
+      [
+        "T-P00-006",
+        "P0",
+        "CS",
+        "CS 2",
+        "Set up docker-compose skeleton (empty service stubs)",
+        "Team confirms monorepo structure below",
+        "Empty-but-runnable repo skeleton",
+        "None",
+        "Smoke test: npm run lint and python -m py_compile succeed on empty scaffolding",
+        "Repo clones clean on a fresh machine"
+      ]
+    ]
+  },
+  {
+    "table_index": 8,
+    "rows": [
+      [
+        "1. Objective",
+        "Working login/registration, JWT issuance, bcrypt password hashing, and role-based middleware (Employee / Analyst / Administrator)."
+      ],
+      [
+        "2. Why this phase exists",
+        "Every protected route in every later phase (DLP scan, dashboard, audit log) depends on an authenticated, role-tagged request context."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 0 complete • MongoDB instance available (local or Atlas)"
+      ],
+      [
+        "7. Responsible person(s)",
+        "Cyber 1 (lead), CS 1 (backend wiring), CS 2 (frontend)"
+      ],
+      [
+        "8. Deliverables",
+        "• Working login/registration flow • JWT issuance + verification middleware • RBAC middleware • Seeded roles collection"
+      ],
+      [
+        "9. Files / components",
+        "• backend/src/controllers/authController.js • backend/src/middleware/auth.js • backend/src/middleware/rbac.js • backend/src/routes/authRoutes.js • backend/src/models/User.js • backend/src/models/Role.js • frontend/src/pages/Login.jsx"
+      ],
+      [
+        "10. APIs required",
+        "• POST /api/v1/auth/register • POST /api/v1/auth/login -> JWT • GET /api/v1/auth/me (protected)"
+      ],
+      [
+        "11. Database changes",
+        "• Creates users, roles collections; seeds Employee/Analyst/Administrator roles"
+      ],
+      [
+        "12. Dataset requirements",
+        "None. (Data Prep track continues in parallel per Phase 0.)"
+      ],
+      [
+        "13. Integration points",
+        "• Frontend login screen -> auth API • auth middleware becomes the dependency of every route added from Phase 2 onward"
+      ],
+      [
+        "14. Testing requirements",
+        "• Valid login • invalid password • expired token • missing token • wrong-role access attempt — each as an explicit documented test case"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• All 5 test cases above pass • No plaintext password ever logged or stored • RBAC blocks a non-admin from an admin-only stub route"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST (5 cases) -> FIX -> VERIFY (Cyber 4 reviews) -> DOCUMENT (API contract in docs/) -> COMMIT to feature/auth-rbac, merge to develop."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 0"
+      ],
+      [
+        "18. Risks",
+        "• JWT secret accidentally committed — Mitigation: Enforce .env + secret-scan pre-commit hook from Phase 0"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• API Gateway rate limiting (Phase 2) • Audit logging of auth events (Phase 5)"
+      ]
+    ]
+  },
+  {
+    "table_index": 9,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P01-007",
+        "P1",
+        "Cyber",
+        "Cyber 1",
+        "Design JWT claims (userId, role, exp) and short-TTL/refresh strategy",
+        "Phase 0 complete",
+        "Working login/registration flow",
+        "Phase 0",
+        "Valid login",
+        "All 5 test cases above pass"
+      ],
+      [
+        "T-P01-008",
+        "P1",
+        "Cyber",
+        "Cyber 1",
+        "Implement bcrypt hashing (>=12 salt rounds), never log plaintext passwords",
+        "Phase 0 complete",
+        "Working login/registration flow",
+        "Phase 0",
+        "Valid login",
+        "All 5 test cases above pass"
+      ],
+      [
+        "T-P01-009",
+        "P1",
+        "Cyber",
+        "Cyber 1",
+        "Implement RBAC middleware enforcing Employee/Analyst/Administrator",
+        "Phase 0 complete",
+        "Working login/registration flow",
+        "Phase 0",
+        "Valid login",
+        "All 5 test cases above pass"
+      ],
+      [
+        "T-P01-010",
+        "P1",
+        "CS",
+        "CS 1",
+        "Mongoose User/Role schemas + seed default roles",
+        "Phase 0 complete",
+        "Working login/registration flow",
+        "Phase 0",
+        "Valid login",
+        "All 5 test cases above pass"
+      ],
+      [
+        "T-P01-011",
+        "P1",
+        "CS",
+        "CS 1",
+        "Auth routes: POST /api/v1/auth/register, /login, GET /auth/me",
+        "Phase 0 complete",
+        "Working login/registration flow",
+        "Phase 0",
+        "Valid login",
+        "All 5 test cases above pass"
+      ],
+      [
+        "T-P01-012",
+        "P1",
+        "CS",
+        "CS 2",
+        "React login/register screens wired to the auth API",
+        "Phase 0 complete",
+        "Working login/registration flow",
+        "Phase 0",
+        "Valid login",
+        "All 5 test cases above pass"
+      ]
+    ]
+  },
+  {
+    "table_index": 10,
+    "rows": [
+      [
+        "1. Objective",
+        "Central request pipeline in front of every route: rate limiting, input validation, security headers, CORS allow-list, request-logging hook."
+      ],
+      [
+        "2. Why this phase exists",
+        "Every subsequent service (DLP, risk, dashboard) is exposed through this gateway layer; building it before those services means they inherit protection by default instead of bolting it on later."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 1 complete (auth middleware exists to sit behind the gateway)"
+      ],
+      [
+        "7. Responsible person(s)",
+        "Cyber 1 (lead), Cyber 4 (headers/testing), CS 1 (wiring)"
+      ],
+      [
+        "8. Deliverables",
+        "• Rate-limit middleware • Validation middleware • Finalized security-header/CORS config"
+      ],
+      [
+        "9. Files / components",
+        "• backend/src/middleware/rateLimit.js • backend/src/middleware/validate.js • backend/src/middleware/securityHeaders.js"
+      ],
+      [
+        "10. APIs required",
+        "• No new public endpoints — wraps existing ones"
+      ],
+      [
+        "11. Database changes",
+        "• None"
+      ],
+      [
+        "12. Dataset requirements",
+        "None."
+      ],
+      [
+        "13. Integration points",
+        "• Sits in front of every route registered from Phase 3 onward"
+      ],
+      [
+        "14. Testing requirements",
+        "• Rate-limit trigger test (Nth request rejected) • malformed-payload rejection test • missing-header/CORS rejection test"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• Requests without valid input fail closed with a clear 4xx, never a 5xx crash"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/api-gateway."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 1"
+      ],
+      [
+        "18. Risks",
+        "• Overly strict rate limits break the dashboard's polling in Phase 11 — Mitigation: Tune limits per route class; revisit after Phase 11 load pattern is known"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• DLP or risk logic • Audit log persistence (Phase 5)"
+      ]
+    ]
+  },
+  {
+    "table_index": 11,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P02-013",
+        "P2",
+        "Cyber",
+        "Cyber 1",
+        "express-rate-limit config per route class (auth vs general)",
+        "Phase 1 complete (auth middleware exists to sit behind the gateway)",
+        "Rate-limit middleware",
+        "Phase 1",
+        "Rate-limit trigger test (Nth request rejected)",
+        "Requests without valid input fail closed with a clear 4xx, never a 5xx crash"
+      ],
+      [
+        "T-P02-014",
+        "P2",
+        "Cyber",
+        "Cyber 4",
+        "Helmet security headers + CORS allow-list finalized",
+        "Phase 1 complete (auth middleware exists to sit behind the gateway)",
+        "Rate-limit middleware",
+        "Phase 1",
+        "Rate-limit trigger test (Nth request rejected)",
+        "Requests without valid input fail closed with a clear 4xx, never a 5xx crash"
+      ],
+      [
+        "T-P02-015",
+        "P2",
+        "Cyber",
+        "Cyber 1",
+        "Input-validation schema layer (Joi/Zod) on all mutating routes",
+        "Phase 1 complete (auth middleware exists to sit behind the gateway)",
+        "Rate-limit middleware",
+        "Phase 1",
+        "Rate-limit trigger test (Nth request rejected)",
+        "Requests without valid input fail closed with a clear 4xx, never a 5xx crash"
+      ],
+      [
+        "T-P02-016",
+        "P2",
+        "CS",
+        "CS 1",
+        "Wire middleware order into the Express app entrypoint",
+        "Phase 1 complete (auth middleware exists to sit behind the gateway)",
+        "Rate-limit middleware",
+        "Phase 1",
+        "Rate-limit trigger test (Nth request rejected)",
+        "Requests without valid input fail closed with a clear 4xx, never a 5xx crash"
+      ],
+      [
+        "T-P02-017",
+        "P2",
+        "CS",
+        "CS 1",
+        "Request-logging hook (pre-cursor to Phase 5 audit logging, not the audit log itself)",
+        "Phase 1 complete (auth middleware exists to sit behind the gateway)",
+        "Rate-limit middleware",
+        "Phase 1",
+        "Rate-limit trigger test (Nth request rejected)",
+        "Requests without valid input fail closed with a clear 4xx, never a 5xx crash"
+      ]
+    ]
+  },
+  {
+    "table_index": 12,
+    "rows": [
+      [
+        "1. Objective",
+        "A DLP scanning service that detects PII, credentials, and structured secrets in text using Regex, Microsoft Presidio, and spaCy NER — matching notebook Cell 3's ReversibleDLPEngine.scan_and_redact, split from the redaction/restore half (Phase 4)."
+      ],
+      [
+        "2. Why this phase exists",
+        "DLP detection must exist and be independently testable before it is wired into reversible redaction (Phase 4) or the risk engine (Phase 6)."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 2 complete (gateway exists to expose the internal DLP endpoint)"
+      ],
+      [
+        "7. Responsible person(s)",
+        "Cyber 2 (lead), AI 4 (Presidio/spaCy port + FastAPI wiring)"
+      ],
+      [
+        "8. Deliverables",
+        "• Standalone dlp-service (FastAPI) exposing /dlp/scan • Ported recognizer set • Measured recall/precision/FPR on ai4privacy sample"
+      ],
+      [
+        "9. Files / components",
+        "• ai-services/dlp-service/main.py • ai-services/dlp-service/recognizers.py • backend/src/services/dlpClient.js"
+      ],
+      [
+        "10. APIs required",
+        "• Internal: POST /dlp/scan {prompt} -> {entities[], token_map, sensitivityScore} (matches notebook Cell 13 contract)"
+      ],
+      [
+        "11. Database changes",
+        "• None yet — token persistence is Phase 4"
+      ],
+      [
+        "12. Dataset requirements",
+        "ai4privacy/pii-masking-200k (public) for evaluation only. Do not train on it — Presidio/spaCy are pretrained."
+      ],
+      [
+        "13. Integration points",
+        "• Called by backend via dlpClient.js • Feeds Phase 6 Risk Engine's dlp_detected_count input"
+      ],
+      [
+        "14. Testing requirements",
+        "• Labeled PII/credential test set -> recall/precision/false-positive rate actually measured, not assumed • Regression test against notebook Cell 3's worked example (AWS key + email in a prompt)"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• Detector flags a defined test set above a team-agreed recall threshold • Measured numbers logged to evaluationResults, not fabricated"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST (measured metrics) -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/dlp-engine."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 2"
+      ],
+      [
+        "18. Risks",
+        "• notebook demo prompt contains a fake but realistic-looking AWS key string — must never be reused verbatim in production test fixtures without clearly marking it synthetic — Mitigation: Regenerate a clearly-fake placeholder pattern for test fixtures; document in the migration matrix"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Reversible token restore/decrypt (Phase 4) • Risk scoring (Phase 6)"
+      ]
+    ]
+  },
+  {
+    "table_index": 13,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P03-018",
+        "P3",
+        "Cyber",
+        "Cyber 2",
+        "Define sensitive-data categories exactly as scoped in Chapter 1 (PII, credentials, structured secrets) — no invented categories",
+        "Phase 2 complete (gateway exists to expose the internal DLP endpoint)",
+        "Standalone dlp-service (FastAPI) exposing /dlp/scan",
+        "Phase 2",
+        "Labeled PII/credential test set -> recall/precision/false-positive rate actually measured, not assumed",
+        "Detector flags a defined test set above a team-agreed recall threshold"
+      ],
+      [
+        "T-P03-019",
+        "P3",
+        "Cyber",
+        "Cyber 2",
+        "Integrate DLP scan result into the (future) policy decision contract",
+        "Phase 2 complete (gateway exists to expose the internal DLP endpoint)",
+        "Standalone dlp-service (FastAPI) exposing /dlp/scan",
+        "Phase 2",
+        "Labeled PII/credential test set -> recall/precision/false-positive rate actually measured, not assumed",
+        "Detector flags a defined test set above a team-agreed recall threshold"
+      ],
+      [
+        "T-P03-020",
+        "P3",
+        "AI",
+        "AI 4",
+        "Port Presidio default recognizers + custom API-key PatternRecognizer from notebook Cell 3",
+        "Phase 2 complete (gateway exists to expose the internal DLP endpoint)",
+        "Standalone dlp-service (FastAPI) exposing /dlp/scan",
+        "Phase 2",
+        "Labeled PII/credential test set -> recall/precision/false-positive rate actually measured, not assumed",
+        "Detector flags a defined test set above a team-agreed recall threshold"
+      ],
+      [
+        "T-P03-021",
+        "P3",
+        "AI",
+        "AI 4",
+        "Port spaCy en_core_web_lg NER pipeline (notebook Cell 0's ensure_spacy_model helper)",
+        "Phase 2 complete (gateway exists to expose the internal DLP endpoint)",
+        "Standalone dlp-service (FastAPI) exposing /dlp/scan",
+        "Phase 2",
+        "Labeled PII/credential test set -> recall/precision/false-positive rate actually measured, not assumed",
+        "Detector flags a defined test set above a team-agreed recall threshold"
+      ],
+      [
+        "T-P03-022",
+        "P3",
+        "AI",
+        "AI 4",
+        "Acquire ai4privacy/pii-masking-200k sample for evaluation (not training)",
+        "Phase 2 complete (gateway exists to expose the internal DLP endpoint)",
+        "Standalone dlp-service (FastAPI) exposing /dlp/scan",
+        "Phase 2",
+        "Labeled PII/credential test set -> recall/precision/false-positive rate actually measured, not assumed",
+        "Detector flags a defined test set above a team-agreed recall threshold"
+      ],
+      [
+        "T-P03-023",
+        "P3",
+        "CS",
+        "CS 1",
+        "Internal dlpClient.js to call the DLP microservice from the Node backend",
+        "Phase 2 complete (gateway exists to expose the internal DLP endpoint)",
+        "Standalone dlp-service (FastAPI) exposing /dlp/scan",
+        "Phase 2",
+        "Labeled PII/credential test set -> recall/precision/false-positive rate actually measured, not assumed",
+        "Detector flags a defined test set above a team-agreed recall threshold"
+      ]
+    ]
+  },
+  {
+    "table_index": 14,
+    "rows": [
+      [
+        "1. Objective",
+        "Full reversible-redaction lifecycle: encrypt detected entities into tokens, store a token map, and restore original values in the AI response — matching notebook Cell 3's restore_response and the Fernet-based token_map."
+      ],
+      [
+        "2. Why this phase exists",
+        "DLP detection (Phase 3) alone is not useful without a safe way to let the redacted prompt go to the AI service and then un-redact the reply for the authorized employee."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 3 complete"
+      ],
+      [
+        "7. Responsible person(s)",
+        "Cyber 2 (lead)"
+      ],
+      [
+        "8. Deliverables",
+        "• Working redact -> AI call -> restore round trip • TTL-based automatic token expiry"
+      ],
+      [
+        "9. Files / components",
+        "• backend/src/models/TokenMapping.js • ai-services/dlp-service/redaction.py"
+      ],
+      [
+        "10. APIs required",
+        "• Internal: reuses /dlp/scan (returns token_map); new POST /dlp/restore {text, token_map} -> restored text"
+      ],
+      [
+        "11. Database changes",
+        "• tokenMappings collection: tokenId, encryptedValue, createdAt, TTL index (mandatory, not optional)"
+      ],
+      [
+        "12. Dataset requirements",
+        "None (reuses Phase 3's evaluation set for round-trip correctness tests)."
+      ],
+      [
+        "13. Integration points",
+        "• Sits between the DLP scan (Phase 3) and any outbound call to a generative-AI service"
+      ],
+      [
+        "14. Testing requirements",
+        "• Round-trip test: redact -> simulate AI reply referencing tokens -> restore -> original values recovered exactly • TTL expiry test: mapping unrecoverable after expiry window"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• Round trip is lossless for every entity type in the Phase 3 test set • Encryption key is never found in application logs or committed artifacts"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/reversible-redaction."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 3"
+      ],
+      [
+        "18. Risks",
+        "• Encryption key handling done insecurely by a student team — Mitigation: Cyber 4 security-reviews the key-management code before merge, ahead of the formal Phase 13 test pass"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Long-term audit trail of redaction events (Phase 5)"
+      ]
+    ]
+  },
+  {
+    "table_index": 15,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P04-024",
+        "P4",
+        "Cyber",
+        "Cyber 2",
+        "Design AES-256/Fernet key management — key must live in a KMS/secret manager, never persisted alongside model artifacts (per notebook Cell 12's explicit warning)",
+        "Phase 3 complete",
+        "Working redact -> AI call -> restore round trip",
+        "Phase 3",
+        "Round-trip test: redact -> simulate AI reply referencing tokens -> restore -> original values recovered exactly",
+        "Round trip is lossless for every entity type in the Phase 3 test set"
+      ],
+      [
+        "T-P04-025",
+        "P4",
+        "Cyber",
+        "Cyber 2",
+        "Enforce TTL-based automatic deletion of token mappings",
+        "Phase 3 complete",
+        "Working redact -> AI call -> restore round trip",
+        "Phase 3",
+        "Round-trip test: redact -> simulate AI reply referencing tokens -> restore -> original values recovered exactly",
+        "Round trip is lossless for every entity type in the Phase 3 test set"
+      ],
+      [
+        "T-P04-026",
+        "P4",
+        "AI",
+        "AI 4",
+        "Port token generation + restore_response logic from notebook Cell 3",
+        "Phase 3 complete",
+        "Working redact -> AI call -> restore round trip",
+        "Phase 3",
+        "Round-trip test: redact -> simulate AI reply referencing tokens -> restore -> original values recovered exactly",
+        "Round trip is lossless for every entity type in the Phase 3 test set"
+      ],
+      [
+        "T-P04-027",
+        "P4",
+        "CS",
+        "CS 1",
+        "tokenMappings Mongoose schema with TTL index",
+        "Phase 3 complete",
+        "Working redact -> AI call -> restore round trip",
+        "Phase 3",
+        "Round-trip test: redact -> simulate AI reply referencing tokens -> restore -> original values recovered exactly",
+        "Round trip is lossless for every entity type in the Phase 3 test set"
+      ]
+    ]
+  },
+  {
+    "table_index": 16,
+    "rows": [
+      [
+        "1. Objective",
+        "A policy engine that turns a risk level into an enforcement action (Allow/Escalate/Block), plus an append-only audit log of every security decision."
+      ],
+      [
+        "2. Why this phase exists",
+        "Risk scoring (Phase 6) is meaningless without a policy layer that acts on it, and every action must be auditable for the security-engineering framing of the project."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 4 complete"
+      ],
+      [
+        "7. Responsible person(s)",
+        "Cyber 3 (policy engine), Cyber 4 (audit logging)"
+      ],
+      [
+        "8. Deliverables",
+        "• Policy evaluation function (risk level -> action) • Working append-only audit log"
+      ],
+      [
+        "9. Files / components",
+        "• backend/src/services/policyEngine.js • backend/src/services/auditLogger.js • backend/src/models/Policy.js • backend/src/models/AuditLog.js"
+      ],
+      [
+        "10. APIs required",
+        "• Internal: evaluatePolicy(riskLevel) -> action • POST /internal/audit/log (called by every security decision point)"
+      ],
+      [
+        "11. Database changes",
+        "• policies collection • auditLogs collection (append-only, no delete route in app logic)"
+      ],
+      [
+        "12. Dataset requirements",
+        "None."
+      ],
+      [
+        "13. Integration points",
+        "• Will receive input from Phase 6's Risk Engine once that phase lands; stub input accepted now for independent testing"
+      ],
+      [
+        "14. Testing requirements",
+        "• Policy decision test matrix (Low/Medium/High -> expected action) • Audit log write-then-attempt-delete test (must fail/be blocked)"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• Every policy decision produces exactly one audit log entry • No code path can delete or mutate an existing audit log entry"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/policy-audit."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 4"
+      ],
+      [
+        "18. Risks",
+        "• Numeric risk-level thresholds are not yet finalized in academic documentation — Mitigation: Use placeholder thresholds now, re-confirm against Chapter 1 sign-off before Phase 6 is declared done (see Risk Register)"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Actual risk scoring math (Phase 6)"
+      ]
+    ]
+  },
+  {
+    "table_index": 17,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P05-028",
+        "P5",
+        "Cyber",
+        "Cyber 3",
+        "Define policy rule schema (ruleType, threshold, action)",
+        "Phase 4 complete",
+        "Policy evaluation function (risk level -> action)",
+        "Phase 4",
+        "Policy decision test matrix (Low/Medium/High -> expected action)",
+        "Every policy decision produces exactly one audit log entry"
+      ],
+      [
+        "T-P05-029",
+        "P5",
+        "Cyber",
+        "Cyber 4",
+        "Append-only audit logging — no deletion path in application logic",
+        "Phase 4 complete",
+        "Policy evaluation function (risk level -> action)",
+        "Phase 4",
+        "Policy decision test matrix (Low/Medium/High -> expected action)",
+        "Every policy decision produces exactly one audit log entry"
+      ],
+      [
+        "T-P05-030",
+        "P5",
+        "Cyber",
+        "Cyber 4",
+        "Audit log integrity checks (hash chaining or equivalent)",
+        "Phase 4 complete",
+        "Policy evaluation function (risk level -> action)",
+        "Phase 4",
+        "Policy decision test matrix (Low/Medium/High -> expected action)",
+        "Every policy decision produces exactly one audit log entry"
+      ],
+      [
+        "T-P05-031",
+        "P5",
+        "CS",
+        "CS 1",
+        "policies and auditLogs Mongoose collections",
+        "Phase 4 complete",
+        "Policy evaluation function (risk level -> action)",
+        "Phase 4",
+        "Policy decision test matrix (Low/Medium/High -> expected action)",
+        "Every policy decision produces exactly one audit log entry"
+      ],
+      [
+        "T-P05-032",
+        "P5",
+        "CS",
+        "CS 2",
+        "Admin UI stub for policy configuration",
+        "Phase 4 complete",
+        "Policy evaluation function (risk level -> action)",
+        "Phase 4",
+        "Policy decision test matrix (Low/Medium/High -> expected action)",
+        "Every policy decision produces exactly one audit log entry"
+      ]
+    ]
+  },
+  {
+    "table_index": 18,
+    "rows": [
+      [
+        "1. Objective",
+        "Deterministic weighted-rule fusion of the voice-authenticity score, social-engineering score, and DLP sensitivity score into a single risk level, matching notebook Cell 4's UnifiedRiskEngine.calculate_phase1_risk."
+      ],
+      [
+        "2. Why this phase exists",
+        "This is the mandatory baseline risk engine the whole demo depends on; Phase 2 (XGBoost/SHAP, Phase 13/22-equivalent) is conditional on top of it, never a replacement for it."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 5 complete (policy engine exists to consume the risk level)"
+      ],
+      [
+        "7. Responsible person(s)",
+        "Cyber 3 (lead)"
+      ],
+      [
+        "8. Deliverables",
+        "• Working Phase 1 risk-fusion function with documented, agreed weights • Combined-incident test scenarios passing"
+      ],
+      [
+        "9. Files / components",
+        "• backend/src/services/riskEngine.js"
+      ],
+      [
+        "10. APIs required",
+        "• Internal: POST /internal/risk/evaluate {deepfake_score, social_eng_score, dlp_detected_count} -> {risk_level, action, contributions} (matches notebook Cell 13 contract)"
+      ],
+      [
+        "11. Database changes",
+        "• incidents collection: riskLevel, sourceType, scores{}, status"
+      ],
+      [
+        "12. Dataset requirements",
+        "None (rule-based, no training data required)."
+      ],
+      [
+        "13. Integration points",
+        "• Consumes stubbed scores now; real scores arrive once Phases 7-9 land (Phase 10 wires them for real)"
+      ],
+      [
+        "14. Testing requirements",
+        "• Combined-incident test scenarios (Section 7.2-equivalent): benign, spoofed-voice, social-engineering, DLP-leak, combined"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• All combined-incident scenarios produce the expected risk level and action • Functional validation, not a statistical accuracy metric, per Chapter 1 §6.4.5"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/risk-engine-phase1."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 5"
+      ],
+      [
+        "18. Risks",
+        "• CONFLICT — the notebook hardcodes weights (deepfake 0.40 / social-engineering 0.35 / DLP 0.25) and a BLOCK threshold of 0.70, but Chapter 1 §6.4.5 explicitly states risk-level thresholds are 'to be defined during implementation.' The notebook's specific numbers were never approved in the academic documentation. — Mitigation: Do NOT silently adopt the notebook's numbers as final. Present them to the supervisor/team as a starting proposal (they are a reasonable prototype default) and get explicit sign-off before they become the documented baseline."
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Phase 2 XGBoost/SHAP model (conditional, later phase) • Any learned weighting — Phase 1 weights are configured, not trained"
+      ]
+    ]
+  },
+  {
+    "table_index": 19,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P06-033",
+        "P6",
+        "Cyber",
+        "Cyber 3",
+        "Implement weighted fusion logic",
+        "Phase 5 complete (policy engine exists to consume the risk level)",
+        "Working Phase 1 risk-fusion function with documented, agreed weights",
+        "Phase 5",
+        "Combined-incident test scenarios (Section 7.2-equivalent): benign, spoofed-voice, social-engineering, DLP-leak, combined",
+        "All combined-incident scenarios produce the expected risk level and action"
+      ],
+      [
+        "T-P06-034",
+        "P6",
+        "Cyber",
+        "Cyber 3",
+        "Wire risk level into the Phase 5 policy engine",
+        "Phase 5 complete (policy engine exists to consume the risk level)",
+        "Working Phase 1 risk-fusion function with documented, agreed weights",
+        "Phase 5",
+        "Combined-incident test scenarios (Section 7.2-equivalent): benign, spoofed-voice, social-engineering, DLP-leak, combined",
+        "All combined-incident scenarios produce the expected risk level and action"
+      ],
+      [
+        "T-P06-035",
+        "P6",
+        "CS",
+        "CS 1",
+        "Internal risk-evaluation endpoint plumbing",
+        "Phase 5 complete (policy engine exists to consume the risk level)",
+        "Working Phase 1 risk-fusion function with documented, agreed weights",
+        "Phase 5",
+        "Combined-incident test scenarios (Section 7.2-equivalent): benign, spoofed-voice, social-engineering, DLP-leak, combined",
+        "All combined-incident scenarios produce the expected risk level and action"
+      ]
+    ]
+  },
+  {
+    "table_index": 20,
+    "rows": [
+      [
+        "1. Objective",
+        "A speech-to-text microservice using the pretrained Faster-Whisper model, matching notebook Cell 1's SpeechTranscriber, exposed for the mBERT social-engineering pipeline to consume."
+      ],
+      [
+        "2. Why this phase exists",
+        "The mBERT classifier (Phase 9) operates on transcribed text, not raw audio — this phase must exist first."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 0 complete (can run in parallel with Phases 1-6 since it has no backend dependency)"
+      ],
+      [
+        "7. Responsible person(s)",
+        "AI 2 (lead)"
+      ],
+      [
+        "8. Deliverables",
+        "• Standalone whisper-service exposing a transcribe endpoint • CPU-fallback path validated (no GPU assumed)"
+      ],
+      [
+        "9. Files / components",
+        "• ai-services/whisper-service/main.py • ai-services/whisper-service/audio_processor.py"
+      ],
+      [
+        "10. APIs required",
+        "• Internal: POST /audio/transcribe {audio_path} -> {transcript}"
+      ],
+      [
+        "11. Database changes",
+        "• None"
+      ],
+      [
+        "12. Dataset requirements",
+        "Controlled/team-recorded audio samples for smoke testing. No public benchmark required for Whisper itself (pretrained, not fine-tuned)."
+      ],
+      [
+        "13. Integration points",
+        "• Consumed by Phase 9's mBERT classifier and Phase 10's AI Integration layer"
+      ],
+      [
+        "14. Testing requirements",
+        "• Transcription smoke test on 3-5 controlled audio clips • Latency measurement of the transcription step alone (feeds Phase 13's benchmark)"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• Service returns a plausible transcript for each smoke-test clip • CPU fallback confirmed functional if no GPU is available"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/whisper-service."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 0"
+      ],
+      [
+        "18. Risks",
+        "• No GPU confirmed available for the team — Mitigation: CPU-fallback path is a hard acceptance-criterion, not optional, even if slower than the latency target"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Fine-tuning Whisper (pretrained-only per Chapter 1) • Arabic upgrade (optional, out of baseline)"
+      ]
+    ]
+  },
+  {
+    "table_index": 21,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P07-036",
+        "P7",
+        "AI",
+        "AI 2",
+        "Wrap notebook Cell 1's AudioProcessor.preprocess_audio (resampling, top_db trimming) as a reusable module",
+        "Phase 0 complete (can run in parallel with Phases 1-6 since it has no backend dependency)",
+        "Standalone whisper-service exposing a transcribe endpoint",
+        "Phase 0",
+        "Transcription smoke test on 3-5 controlled audio clips",
+        "Service returns a plausible transcript for each smoke-test clip"
+      ],
+      [
+        "T-P07-037",
+        "P7",
+        "AI",
+        "AI 2",
+        "Wrap SpeechTranscriber (pretrained faster-whisper 'base' model) as a callable service",
+        "Phase 0 complete (can run in parallel with Phases 1-6 since it has no backend dependency)",
+        "Standalone whisper-service exposing a transcribe endpoint",
+        "Phase 0",
+        "Transcription smoke test on 3-5 controlled audio clips",
+        "Service returns a plausible transcript for each smoke-test clip"
+      ],
+      [
+        "T-P07-038",
+        "P7",
+        "AI",
+        "AI 2",
+        "Validate on a small controlled-audio sample set",
+        "Phase 0 complete (can run in parallel with Phases 1-6 since it has no backend dependency)",
+        "Standalone whisper-service exposing a transcribe endpoint",
+        "Phase 0",
+        "Transcription smoke test on 3-5 controlled audio clips",
+        "Service returns a plausible transcript for each smoke-test clip"
+      ]
+    ]
+  },
+  {
+    "table_index": 22,
+    "rows": [
+      [
+        "1. Objective",
+        "A voice-authenticity classifier using the pretrained RawNet2 anti-spoofing model (SincConv + FMS + ResBlock + GRU architecture from notebook Cells 10-11), with a validated CPU fallback."
+      ],
+      [
+        "2. Why this phase exists",
+        "This is one of the three mandatory Phase 1 risk-fusion inputs; it must be independently functional and independently tested before Phase 10 wires it in."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 0 complete (can run in parallel with Phases 1-7)"
+      ],
+      [
+        "7. Responsible person(s)",
+        "AI 1 (lead)"
+      ],
+      [
+        "8. Deliverables",
+        "• Standalone voice-deepfake-service • Real ASVspoof-based evaluation (EER, ROC-AUC) replacing the notebook's simulated scores"
+      ],
+      [
+        "9. Files / components",
+        "• ai-services/voice-deepfake-service/main.py • ai-services/voice-deepfake-service/rawnet2.py"
+      ],
+      [
+        "10. APIs required",
+        "• Internal: POST /audio/analyze-deepfake {audio_path} -> {authenticity_score, is_spoofed}"
+      ],
+      [
+        "11. Database changes",
+        "• None (evaluation results go to evaluationResults in Phase 13/19)"
+      ],
+      [
+        "12. Dataset requirements",
+        "ASVspoof 2019/2021 (real/public) for evaluation. WaveFake (real/public) as a secondary evaluation source. No team-generated synthetic data for this component."
+      ],
+      [
+        "13. Integration points",
+        "• Consumed by Phase 10's AI Integration layer and Phase 6's risk fusion"
+      ],
+      [
+        "14. Testing requirements",
+        "• Real ASVspoof protocol evaluation producing an actual EER/ROC-AUC, replacing notebook Cell 14's simulated bonafide/spoofed score distributions • CPU-fallback latency test"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• A real (not simulated) EER is measured and logged to evaluationResults • Service fails loudly (not silently with random scores) if weights are missing"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST (real EER) -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/rawnet2-service."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 0"
+      ],
+      [
+        "18. Risks",
+        "• FLAGGED — notebook Cell 14's EER/ROC-AUC numbers are computed from np.random.normal-generated bonafide/spoofed score distributions (SIMULATED SCORES), not a real model run. These numbers must never be quoted in the defense as measured accuracy. — Mitigation: This phase's acceptance criterion explicitly requires a real ASVspoof run before any number is reported • No confirmed GPU — Mitigation: Same CPU-fallback mitigation as Phase 7"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Voiceprint/speaker verification (Future Work) • Fine-tuning beyond the optional path"
+      ]
+    ]
+  },
+  {
+    "table_index": 23,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P08-039",
+        "P8",
+        "AI",
+        "AI 1",
+        "Port the RawNet2 architecture (SincConv, FMS, ResBlock, RawNet2 classes) from notebook Cells 10-11 unchanged",
+        "Phase 0 complete (can run in parallel with Phases 1-7)",
+        "Standalone voice-deepfake-service",
+        "Phase 0",
+        "Real ASVspoof protocol evaluation producing an actual EER/ROC-AUC, replacing notebook Cell 14's simulated bonafide/spoofed score distributions",
+        "A real (not simulated) EER is measured and logged to evaluationResults"
+      ],
+      [
+        "T-P08-040",
+        "P8",
+        "AI",
+        "AI 1",
+        "Source a real ASVspoof-trained checkpoint for RAWNET2_WEIGHTS_PATH — baseline is the pretrained checkpoint; fine-tuning is optional per project rules",
+        "Phase 0 complete (can run in parallel with Phases 1-7)",
+        "Standalone voice-deepfake-service",
+        "Phase 0",
+        "Real ASVspoof protocol evaluation producing an actual EER/ROC-AUC, replacing notebook Cell 14's simulated bonafide/spoofed score distributions",
+        "A real (not simulated) EER is measured and logged to evaluationResults"
+      ],
+      [
+        "T-P08-041",
+        "P8",
+        "AI",
+        "AI 1",
+        "Remove/replace the notebook's DummyVoiceDetector fallback with a clear startup failure if no real weights are found (a silent random-score fallback must never reach production)",
+        "Phase 0 complete (can run in parallel with Phases 1-7)",
+        "Standalone voice-deepfake-service",
+        "Phase 0",
+        "Real ASVspoof protocol evaluation producing an actual EER/ROC-AUC, replacing notebook Cell 14's simulated bonafide/spoofed score distributions",
+        "A real (not simulated) EER is measured and logged to evaluationResults"
+      ]
+    ]
+  },
+  {
+    "table_index": 24,
+    "rows": [
+      [
+        "1. Objective",
+        "A multi-label social-engineering classifier: pretrained mBERT encoder (bert-base-multilingual-cased) plus a project-specific classification head trained on labeled data, per notebook Cells 2, 6-8."
+      ],
+      [
+        "2. Why this phase exists",
+        "mBERT is an encoder, not a ready-made classifier — the project-specific head must be trained before this component can produce the social-engineering score Phase 6 needs."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 7 complete (needs transcribed text as training/eval input for real call-audio use, though initial training can proceed on text directly)"
+      ],
+      [
+        "7. Responsible person(s)",
+        "AI 3 (lead)"
+      ],
+      [
+        "8. Deliverables",
+        "• Trained classification head + saved state dict + tokenizer • Measured per-label precision/recall/F1"
+      ],
+      [
+        "9. Files / components",
+        "• ai-services/social-engineering-service/model.py • ai-services/social-engineering-service/train.py • easp_ai_artifacts/mbert_social_engineering.pt • easp_ai_artifacts/mbert_tokenizer/"
+      ],
+      [
+        "10. APIs required",
+        "• Internal: POST /nlp/classify {transcript} -> {urgency, authority_impersonation, credential_request, payment_request, scores}"
+      ],
+      [
+        "11. Database changes",
+        "• None directly (evaluation results go to evaluationResults)"
+      ],
+      [
+        "12. Dataset requirements",
+        "SMS Spam Collection (real/public) with regex-derived proxy multi-labels (urgency, authority_impersonation, credential_request, payment_request), per notebook Cell 6. Enron Email and public phishing corpora as documented alternate/supplementary sources. CoNLL-2003 not directly used by this component (NER, used by Phase 3's spaCy pipeline instead)."
+      ],
+      [
+        "13. Integration points",
+        "• Consumes transcripts from Phase 7's Whisper service for live-audio use • Feeds Phase 6's risk fusion"
+      ],
+      [
+        "14. Testing requirements",
+        "• Held-out test split evaluation (precision/recall/F1 per label, per notebook Cell 8) • Label-imbalance check (report actual distribution, not assumed balance)"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• Per-label F1 is measured and logged, not asserted • Domain-gap limitation is documented alongside the numbers, not hidden"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/mbert-social-engineering."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 7 (for live-audio path)"
+      ],
+      [
+        "18. Risks",
+        "• Domain gap: trained on SMS spam text, evaluated conceptually against voice-call social-engineering scenarios — Mitigation: Explicitly documented as a known limitation, not silently corrected; flagged again at Phase 19-equivalent evaluation • Regex-derived labels are a proxy, not ground truth — Mitigation: Treat early F1 numbers as directional; do not present as validated accuracy without caveat"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Full fine-tuning of the mBERT encoder itself (only the head is trained, per Chapter 1's encoder-not-classifier framing) • Arabic upgrade to XLM-R (optional, out of baseline)"
+      ]
+    ]
+  },
+  {
+    "table_index": 25,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P09-042",
+        "P9",
+        "AI",
+        "AI 3",
+        "Port SocialEngineeringmBERT model + SocialEngineeringDetector from notebook Cell 2",
+        "Phase 7 complete (needs transcribed text as training/eval input for real call-audio use, though initial training can proceed on text directly)",
+        "Trained classification head + saved state dict + tokenizer",
+        "Phase 7 (for live-audio path)",
+        "Held-out test split evaluation (precision/recall/F1 per label, per notebook Cell 8)",
+        "Per-label F1 is measured and logged, not asserted"
+      ],
+      [
+        "T-P09-043",
+        "P9",
+        "AI",
+        "AI 3",
+        "Port the SMS Spam Collection loading + regex-based multi-label mapping from notebook Cell 6",
+        "Phase 7 complete (needs transcribed text as training/eval input for real call-audio use, though initial training can proceed on text directly)",
+        "Trained classification head + saved state dict + tokenizer",
+        "Phase 7 (for live-audio path)",
+        "Held-out test split evaluation (precision/recall/F1 per label, per notebook Cell 8)",
+        "Per-label F1 is measured and logged, not asserted"
+      ],
+      [
+        "T-P09-044",
+        "P9",
+        "AI",
+        "AI 3",
+        "Port the class-weighted (pos_weight) training loop from notebook Cell 7",
+        "Phase 7 complete (needs transcribed text as training/eval input for real call-audio use, though initial training can proceed on text directly)",
+        "Trained classification head + saved state dict + tokenizer",
+        "Phase 7 (for live-audio path)",
+        "Held-out test split evaluation (precision/recall/F1 per label, per notebook Cell 8)",
+        "Per-label F1 is measured and logged, not asserted"
+      ],
+      [
+        "T-P09-045",
+        "P9",
+        "AI",
+        "AI 3",
+        "Port per-label precision/recall/F1 evaluation from notebook Cell 8",
+        "Phase 7 complete (needs transcribed text as training/eval input for real call-audio use, though initial training can proceed on text directly)",
+        "Trained classification head + saved state dict + tokenizer",
+        "Phase 7 (for live-audio path)",
+        "Held-out test split evaluation (precision/recall/F1 per label, per notebook Cell 8)",
+        "Per-label F1 is measured and logged, not asserted"
+      ],
+      [
+        "T-P09-046",
+        "P9",
+        "AI",
+        "AI 3",
+        "Document the domain gap: labels are proxy-derived from SMS spam text via regex, not hand-annotated call transcripts (already a stated limitation in Chapter 1 §6.5) — do not overstate accuracy",
+        "Phase 7 complete (needs transcribed text as training/eval input for real call-audio use, though initial training can proceed on text directly)",
+        "Trained classification head + saved state dict + tokenizer",
+        "Phase 7 (for live-audio path)",
+        "Held-out test split evaluation (precision/recall/F1 per label, per notebook Cell 8)",
+        "Per-label F1 is measured and logged, not asserted"
+      ]
+    ]
+  },
+  {
+    "table_index": 26,
+    "rows": [
+      [
+        "1. Objective",
+        "A single FastAPI microservice wrapping DLP, voice-deepfake, transcription, and social-engineering components behind three production endpoints, matching notebook Cell 13's EASP_AIService/app structure, consumed by the Node.js backend's Security Engine layer."
+      ],
+      [
+        "2. Why this phase exists",
+        "Phases 3-4 and 7-9 are independently-built components; this phase is the seam that makes them one callable service for the backend."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phases 3, 4, 6, 7, 8, 9 all independently functional and tested — do not integrate until each model works independently"
+      ],
+      [
+        "7. Responsible person(s)",
+        "AI 4 (lead), CS 1 (backend-side integration)"
+      ],
+      [
+        "8. Deliverables",
+        "• Running FastAPI microservice reachable from the Node backend • End-to-end call: prompt/audio in -> DLP + voice + social-engineering + risk out"
+      ],
+      [
+        "9. Files / components",
+        "• ai-services/ai-gateway/main.py (or equivalent consolidated entrypoint) • backend/src/services/aiServiceClient.js"
+      ],
+      [
+        "10. APIs required",
+        "• POST /dlp/scan • POST /audio/analyze • POST /risk/evaluate (all three from notebook Cell 13, now genuinely served, not just defined)"
+      ],
+      [
+        "11. Database changes",
+        "• None new — writes flow through to incidents/evaluationResults defined in earlier phases"
+      ],
+      [
+        "12. Dataset requirements",
+        "None new — this phase is integration, not modeling."
+      ],
+      [
+        "13. Integration points",
+        "• This IS the integration point between the AI services (Phases 3-9) and the Node backend (Phases 1-6)"
+      ],
+      [
+        "14. Testing requirements",
+        "• Live HTTP call to all three endpoints (not just unit-level function calls) • Failure-mode test: one sub-model down -> service returns a clear error, not a silent wrong answer"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• All three endpoints are reachable over HTTP from the Node backend in the Docker network • A full request (audio + prompt) produces a coherent combined response"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST (live HTTP) -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/ai-integration."
+      ],
+      [
+        "17. Dependencies",
+        "• Phases 3, 4, 6, 7, 8, 9"
+      ],
+      [
+        "18. Risks",
+        "• Internal AI services exposed beyond the internal Docker network — Mitigation: Cyber 4 verifies network isolation before this phase is marked done"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Phase 2 XGBoost/SHAP wiring (kept separate, conditional — see Phase 13's evaluation gate)"
+      ]
+    ]
+  },
+  {
+    "table_index": 27,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P10-047",
+        "P10",
+        "Cyber",
+        "Cyber 4",
+        "Security-review the internal REST contract (auth between Node backend and Python services, internal-network-only exposure)",
+        "Phases 3, 4, 6, 7, 8, 9 all independently functional and tested — do not integrate until each model works independently",
+        "Running FastAPI microservice reachable from the Node backend",
+        "Phases 3, 4, 6, 7, 8, 9",
+        "Live HTTP call to all three endpoints (not just unit-level function calls)",
+        "All three endpoints are reachable over HTTP from the Node backend in the Docker network"
+      ],
+      [
+        "T-P10-048",
+        "P10",
+        "AI",
+        "AI 4",
+        "Assemble EASP_AIService wrapper class from notebook Cell 13",
+        "Phases 3, 4, 6, 7, 8, 9 all independently functional and tested — do not integrate until each model works independently",
+        "Running FastAPI microservice reachable from the Node backend",
+        "Phases 3, 4, 6, 7, 8, 9",
+        "Live HTTP call to all three endpoints (not just unit-level function calls)",
+        "All three endpoints are reachable over HTTP from the Node backend in the Docker network"
+      ],
+      [
+        "T-P10-049",
+        "P10",
+        "AI",
+        "AI 4",
+        "Stand up the real FastAPI app with /dlp/scan, /audio/analyze, /risk/evaluate — the notebook's own comment notes the original version was 'just a class, no app, no endpoints' and had to be fixed; verify the production port is genuinely reachable over HTTP, not just importable",
+        "Phases 3, 4, 6, 7, 8, 9 all independently functional and tested — do not integrate until each model works independently",
+        "Running FastAPI microservice reachable from the Node backend",
+        "Phases 3, 4, 6, 7, 8, 9",
+        "Live HTTP call to all three endpoints (not just unit-level function calls)",
+        "All three endpoints are reachable over HTTP from the Node backend in the Docker network"
+      ],
+      [
+        "T-P10-050",
+        "P10",
+        "CS",
+        "CS 1",
+        "Node backend Security Engine layer calling the FastAPI service over the internal Docker network",
+        "Phases 3, 4, 6, 7, 8, 9 all independently functional and tested — do not integrate until each model works independently",
+        "Running FastAPI microservice reachable from the Node backend",
+        "Phases 3, 4, 6, 7, 8, 9",
+        "Live HTTP call to all three endpoints (not just unit-level function calls)",
+        "All three endpoints are reachable over HTTP from the Node backend in the Docker network"
+      ]
+    ]
+  },
+  {
+    "table_index": 28,
+    "rows": [
+      [
+        "1. Objective",
+        "A role-aware React dashboard distinguishing Detected Event / Risk Level / Policy Action / Model Result / Measured Performance, with a hard rule that any metric without a real measured value renders as 'No measured data available' rather than a placeholder number."
+      ],
+      [
+        "2. Why this phase exists",
+        "This is the human-facing surface analysts and the supervisor will actually look at during the defense; it must never display fabricated numbers."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 5 (policy/audit data to display) and Phase 10 (AI results to display) — UI scaffolding may start earlier in parallel using mocked responses"
+      ],
+      [
+        "7. Responsible person(s)",
+        "CS 2 (lead)"
+      ],
+      [
+        "8. Deliverables",
+        "• Working dashboard with the three role views • Verified fallback behavior for unmeasured metrics"
+      ],
+      [
+        "9. Files / components",
+        "• frontend/src/pages/Dashboard.jsx • frontend/src/components/IncidentTable.jsx • frontend/src/components/MetricsPanel.jsx"
+      ],
+      [
+        "10. APIs required",
+        "• GET /api/v1/incidents • GET /api/v1/audit-logs (role-restricted) • GET /api/v1/metrics"
+      ],
+      [
+        "11. Database changes",
+        "• Reads only — no new collections"
+      ],
+      [
+        "12. Dataset requirements",
+        "None."
+      ],
+      [
+        "13. Integration points",
+        "• Consumes Phase 5's audit log and Phase 6's risk-level output"
+      ],
+      [
+        "14. Testing requirements",
+        "• Role-based visibility test (Employee cannot see Administrator-only audit detail) • Unmeasured-metric fallback test (component renders the literal fallback string, never a fabricated number)"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• Each role sees the correct subset of data • No placeholder numbers ever render for an unmeasured metric"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/security-dashboard."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 5 • Phase 10 (for live data; can demo with mocks earlier)"
+      ],
+      [
+        "18. Risks",
+        "• Team tempted to hardcode a demo number for a metric not yet measured — Mitigation: Explicit acceptance criterion above blocks this; Cyber 4 spot-checks before merge"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• SIEM export (should-implement, later/optional)"
+      ]
+    ]
+  },
+  {
+    "table_index": 29,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P11-051",
+        "P11",
+        "Cyber",
+        "Cyber 4",
+        "Review that the dashboard does not leak sensitive redacted values to unauthorized roles",
+        "Phase 5 (policy/audit data to display) and Phase 10 (AI results to display) — UI scaffolding may start earlier in parallel using mocked responses",
+        "Working dashboard with the three role views",
+        "Phase 5, Phase 10 (for live data; can demo with mocks earlier)",
+        "Role-based visibility test (Employee cannot see Administrator-only audit detail)",
+        "Each role sees the correct subset of data"
+      ],
+      [
+        "T-P11-052",
+        "P11",
+        "CS",
+        "CS 2",
+        "Role-aware routing (Employee vs Analyst vs Administrator views)",
+        "Phase 5 (policy/audit data to display) and Phase 10 (AI results to display) — UI scaffolding may start earlier in parallel using mocked responses",
+        "Working dashboard with the three role views",
+        "Phase 5, Phase 10 (for live data; can demo with mocks earlier)",
+        "Role-based visibility test (Employee cannot see Administrator-only audit detail)",
+        "Each role sees the correct subset of data"
+      ],
+      [
+        "T-P11-053",
+        "P11",
+        "CS",
+        "CS 2",
+        "Dashboard components consuming audit log / incident / evaluationResults data",
+        "Phase 5 (policy/audit data to display) and Phase 10 (AI results to display) — UI scaffolding may start earlier in parallel using mocked responses",
+        "Working dashboard with the three role views",
+        "Phase 5, Phase 10 (for live data; can demo with mocks earlier)",
+        "Role-based visibility test (Employee cannot see Administrator-only audit detail)",
+        "Each role sees the correct subset of data"
+      ],
+      [
+        "T-P11-054",
+        "P11",
+        "CS",
+        "CS 2",
+        "Enforce the 'No measured data available' fallback at the component level",
+        "Phase 5 (policy/audit data to display) and Phase 10 (AI results to display) — UI scaffolding may start earlier in parallel using mocked responses",
+        "Working dashboard with the three role views",
+        "Phase 5, Phase 10 (for live data; can demo with mocks earlier)",
+        "Role-based visibility test (Employee cannot see Administrator-only audit detail)",
+        "Each role sees the correct subset of data"
+      ]
+    ]
+  },
+  {
+    "table_index": 30,
+    "rows": [
+      [
+        "1. Objective",
+        "Wire every prior phase into one live pipeline: prompt/voice in -> DLP/AI analysis -> risk fusion -> policy decision -> audit log -> dashboard update, replacing all mocked responses with real service calls."
+      ],
+      [
+        "2. Why this phase exists",
+        "This is the first point at which the system is demonstrable as a whole rather than as independently-tested parts."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phases 1-11 complete"
+      ],
+      [
+        "7. Responsible person(s)",
+        "CS 1 (lead), all teams (integration milestone)"
+      ],
+      [
+        "8. Deliverables",
+        "• Full pipeline runnable end to end on a controlled demo scenario"
+      ],
+      [
+        "9. Files / components",
+        "• backend/src/routes/index.js (final route wiring)"
+      ],
+      [
+        "10. APIs required",
+        "• All previously defined endpoints, now called for real in sequence"
+      ],
+      [
+        "11. Database changes",
+        "• No schema changes — this phase is wiring, not new storage"
+      ],
+      [
+        "12. Dataset requirements",
+        "None new."
+      ],
+      [
+        "13. Integration points",
+        "• Every phase's integration point becomes live here"
+      ],
+      [
+        "14. Testing requirements",
+        "• Re-run the notebook's own combined-incident scenarios (Cell 5's End-to-End Simulation Pipeline) now with real model outputs instead of mocks"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• The same scenarios that passed with mocked data in earlier phases now pass with live data"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT to develop (integration checkpoint)."
+      ],
+      [
+        "17. Dependencies",
+        "• Phases 1-11"
+      ],
+      [
+        "18. Risks",
+        "• Integration risk concentrated here — most likely point for cross-team breakage — Mitigation: Freeze feature work for 2-3 days around this phase; all hands on integration bugs"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Any new feature — this phase wires existing features together only"
+      ]
+    ]
+  },
+  {
+    "table_index": 31,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P12-055",
+        "P12",
+        "Cyber",
+        "Cyber 4",
+        "Verify RBAC/audit logging holds end to end, not just per-component",
+        "Phases 1-11 complete",
+        "Full pipeline runnable end to end on a controlled demo scenario",
+        "Phases 1-11",
+        "Re-run the notebook's own combined-incident scenarios (Cell 5's End-to-End Simulation Pipeline) now with real model outputs instead of mocks",
+        "The same scenarios that passed with mocked data in earlier phases now pass with live data"
+      ],
+      [
+        "T-P12-056",
+        "P12",
+        "AI",
+        "AI 4",
+        "Confirm AI Integration (Phase 10) responses flow unmocked into the risk engine",
+        "Phases 1-11 complete",
+        "Full pipeline runnable end to end on a controlled demo scenario",
+        "Phases 1-11",
+        "Re-run the notebook's own combined-incident scenarios (Cell 5's End-to-End Simulation Pipeline) now with real model outputs instead of mocks",
+        "The same scenarios that passed with mocked data in earlier phases now pass with live data"
+      ],
+      [
+        "T-P12-057",
+        "P12",
+        "CS",
+        "CS 1",
+        "Replace every mocked frontend/backend call with the real service call",
+        "Phases 1-11 complete",
+        "Full pipeline runnable end to end on a controlled demo scenario",
+        "Phases 1-11",
+        "Re-run the notebook's own combined-incident scenarios (Cell 5's End-to-End Simulation Pipeline) now with real model outputs instead of mocks",
+        "The same scenarios that passed with mocked data in earlier phases now pass with live data"
+      ],
+      [
+        "T-P12-058",
+        "P12",
+        "CS",
+        "CS 1",
+        "End-to-end wiring across Express routes",
+        "Phases 1-11 complete",
+        "Full pipeline runnable end to end on a controlled demo scenario",
+        "Phases 1-11",
+        "Re-run the notebook's own combined-incident scenarios (Cell 5's End-to-End Simulation Pipeline) now with real model outputs instead of mocks",
+        "The same scenarios that passed with mocked data in earlier phases now pass with live data"
+      ]
+    ]
+  },
+  {
+    "table_index": 32,
+    "rows": [
+      [
+        "1. Objective",
+        "Formal test pass: cybersecurity test cases, AI/data-science evaluation (final EER, F1, DLP recall/precision/FPR), and end-to-end latency measurement against the <=3s target."
+      ],
+      [
+        "2. Why this phase exists",
+        "Supersedes ad hoc spot-checks from Phases 3-9 with final, dated, reproducible numbers usable in the defense — and this is where the XGBoost/SHAP go/no-go decision (conditional Phase 2 risk engine) is made from real data."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 12 complete"
+      ],
+      [
+        "7. Responsible person(s)",
+        "Cyber 4 (security tests), AI 4 / Data Science leads (AI evaluation), CS 1 (performance)"
+      ],
+      [
+        "8. Deliverables",
+        "• Signed-off security test report • Final measured AI metrics logged to evaluationResults • Latency report • Phase 2 go/no-go decision, documented either way"
+      ],
+      [
+        "9. Files / components",
+        "• tests/security/ • tests/ai-evaluation/ • docs/evaluation-results.md"
+      ],
+      [
+        "10. APIs required",
+        "• No new endpoints — exercises existing ones"
+      ],
+      [
+        "11. Database changes",
+        "• evaluationResults collection populated with final, dated, versioned numbers"
+      ],
+      [
+        "12. Dataset requirements",
+        "Real ASVspoof split for RawNet2, held-out SMS Spam split for mBERT, ai4privacy sample for DLP. If pursuing Phase 2: real analyst-labeled incident data only — notebook Cell 9's synthetic fallback (np.random-generated features/labels) must not be used for a number quoted in the defense."
+      ],
+      [
+        "13. Integration points",
+        "• Exercises the full Phase 12 pipeline under test conditions"
+      ],
+      [
+        "14. Testing requirements",
+        "• Every security test case above has a real pass/fail result recorded — none marked 'assumed passing' • Every AI component has one final, dated, reproducible measured result"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• A real measured latency number exists, whether or not it meets the <=3s target — reported honestly either way • No number in the evaluation report is untraceable to an actual run"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT (test harness) -> RUN -> TEST -> FIX -> VERIFY -> DOCUMENT -> COMMIT to feature/formal-testing."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 12"
+      ],
+      [
+        "18. Risks",
+        "• Temptation to reuse notebook Cell 9's synthetic XGBoost data or Cell 14's simulated RawNet2 scores as 'final' numbers — Mitigation: Explicitly forbidden by this phase's acceptance criteria; migration matrix (below) flags both as non-production • Team-generated synthetic social-engineering/incident labels may be too small a corpus for meaningful evaluation — Mitigation: Report actual corpus size at the end of labeling, not assumed in advance"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Phase 2 XGBoost+SHAP implementation itself — this phase only makes the go/no-go call; implementation (if approved) is a separate follow-on task, not part of the 15-phase baseline"
+      ]
+    ]
+  },
+  {
+    "table_index": 33,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P13-059",
+        "P13",
+        "Cyber",
+        "Cyber 4",
+        "Security test cases: unauthorized access, privilege escalation, invalid/expired JWT, brute-force/rate-limit behavior, sensitive-data leakage, prompt-injection cases (OWASP-LLM01-aligned), malformed API requests, session/token abuse — each with documented input, expected output, actual result",
+        "Phase 12 complete",
+        "Signed-off security test report",
+        "Phase 12",
+        "Every security test case above has a real pass/fail result recorded — none marked 'assumed passing'",
+        "A real measured latency number exists, whether or not it meets the <=3s target — reported honestly either way"
+      ],
+      [
+        "T-P13-060",
+        "P13",
+        "AI",
+        "AI 1",
+        "Final EER for RawNet2 on real ASVspoof data (not the notebook's simulated distributions)",
+        "Phase 12 complete",
+        "Signed-off security test report",
+        "Phase 12",
+        "Every security test case above has a real pass/fail result recorded — none marked 'assumed passing'",
+        "A real measured latency number exists, whether or not it meets the <=3s target — reported honestly either way"
+      ],
+      [
+        "T-P13-061",
+        "P13",
+        "AI",
+        "AI 3",
+        "Final per-label precision/recall/F1 for mBERT+head",
+        "Phase 12 complete",
+        "Signed-off security test report",
+        "Phase 12",
+        "Every security test case above has a real pass/fail result recorded — none marked 'assumed passing'",
+        "A real measured latency number exists, whether or not it meets the <=3s target — reported honestly either way"
+      ],
+      [
+        "T-P13-062",
+        "P13",
+        "AI",
+        "AI 4",
+        "Final DLP recall/precision/FPR",
+        "Phase 12 complete",
+        "Signed-off security test report",
+        "Phase 12",
+        "Every security test case above has a real pass/fail result recorded — none marked 'assumed passing'",
+        "A real measured latency number exists, whether or not it meets the <=3s target — reported honestly either way"
+      ],
+      [
+        "T-P13-063",
+        "P13",
+        "AI",
+        "AI 4",
+        "Go/no-go call on Phase 2 XGBoost+SHAP: only proceed if real analyst-labeled incident data (not notebook Cell 9's synthetic X_sim/y_sim) is actually sufficient — report the real corpus size before deciding, don't assume it in advance",
+        "Phase 12 complete",
+        "Signed-off security test report",
+        "Phase 12",
+        "Every security test case above has a real pass/fail result recorded — none marked 'assumed passing'",
+        "A real measured latency number exists, whether or not it meets the <=3s target — reported honestly either way"
+      ],
+      [
+        "T-P13-064",
+        "P13",
+        "AI",
+        "CS 1",
+        "Wall-clock latency measurement per pipeline stage and end-to-end, per notebook Cell 11's benchmarking structure",
+        "Phase 12 complete",
+        "Signed-off security test report",
+        "Phase 12",
+        "Every security test case above has a real pass/fail result recorded — none marked 'assumed passing'",
+        "A real measured latency number exists, whether or not it meets the <=3s target — reported honestly either way"
+      ],
+      [
+        "T-P13-065",
+        "P13",
+        "CS",
+        "CS 1",
+        "Load-test harness for the latency measurement",
+        "Phase 12 complete",
+        "Signed-off security test report",
+        "Phase 12",
+        "Every security test case above has a real pass/fail result recorded — none marked 'assumed passing'",
+        "A real measured latency number exists, whether or not it meets the <=3s target — reported honestly either way"
+      ]
+    ]
+  },
+  {
+    "table_index": 34,
+    "rows": [
+      [
+        "1. Objective",
+        "Defense-ready state: rehearsed demo script, all documentation synchronized with what was actually built, final measured-metrics summary."
+      ],
+      [
+        "2. Why this phase exists",
+        "This is the deliverable the supervisor/committee evaluates — everything before this phase was building toward this state."
+      ],
+      [
+        "3. Prerequisites",
+        "• Phase 13 complete"
+      ],
+      [
+        "7. Responsible person(s)",
+        "All teams"
+      ],
+      [
+        "8. Deliverables",
+        "• Updated docs/ reflecting real implementation (not the aspirational Chapter 1 baseline where they diverge) • Final measured-metrics summary • Rehearsed demo script"
+      ],
+      [
+        "9. Files / components",
+        "• docs/final-report/ • docs/demo-script.md"
+      ],
+      [
+        "10. APIs required",
+        "• None new"
+      ],
+      [
+        "11. Database changes",
+        "• None new"
+      ],
+      [
+        "12. Dataset requirements",
+        "None new — this phase consolidates, does not generate."
+      ],
+      [
+        "13. Integration points",
+        "• Full-system rehearsal of the Phase 12 pipeline"
+      ],
+      [
+        "14. Testing requirements",
+        "• Full rehearsal run-through of all demo scenarios at least twice"
+      ],
+      [
+        "15. Acceptance criteria",
+        "• Every claim in the documentation is traceable to either (a) working code or (b) an explicitly labeled Future Work item — no gap between what's written and what's built"
+      ],
+      [
+        "16. Definition of Done",
+        "IMPLEMENT (docs/script) -> RUN (rehearsal) -> TEST -> FIX -> VERIFY (supervisor pre-review if possible) -> DOCUMENT -> COMMIT to main (release tag)."
+      ],
+      [
+        "17. Dependencies",
+        "• Phase 13"
+      ],
+      [
+        "18. Risks",
+        "• Documentation drift — Chapter 1's aspirational claims not updated to match what was actually built — Mitigation: Explicit acceptance criterion above; assign one person (AI 4 or CS 1) as documentation-accuracy owner for this phase"
+      ],
+      [
+        "19. Do NOT implement here",
+        "• Any Future Work item (image/video deepfake, production PBX, universal HTTPS interception, threat intelligence, voiceprint verification, federated learning, autoencoder anomaly detection) — none of these appear in this phase or any phase above"
+      ]
+    ]
+  },
+  {
+    "table_index": 35,
+    "rows": [
+      [
+        "Task ID",
+        "Ph.",
+        "Team",
+        "Person",
+        "Task",
+        "Input",
+        "Output",
+        "Dep.",
+        "Test",
+        "Acceptance"
+      ],
+      [
+        "T-P14-066",
+        "P14",
+        "Cyber",
+        "Cyber 4",
+        "Final review that no security claim in the documentation exceeds what Phase 13 actually verified",
+        "Phase 13 complete",
+        "Updated docs/ reflecting real implementation (not the aspirational Chapter 1 baseline where they diverge)",
+        "Phase 13",
+        "Full rehearsal run-through of all demo scenarios at least twice",
+        "Every claim in the documentation is traceable to either (a) working code or (b) an explicitly labeled Future Work item — no gap between what's written and what's built"
+      ],
+      [
+        "T-P14-067",
+        "P14",
+        "AI",
+        "AI 4",
+        "Final measured-metrics summary compiled from evaluationResults",
+        "Phase 13 complete",
+        "Updated docs/ reflecting real implementation (not the aspirational Chapter 1 baseline where they diverge)",
+        "Phase 13",
+        "Full rehearsal run-through of all demo scenarios at least twice",
+        "Every claim in the documentation is traceable to either (a) working code or (b) an explicitly labeled Future Work item — no gap between what's written and what's built"
+      ],
+      [
+        "T-P14-068",
+        "P14",
+        "CS",
+        "CS 1",
+        "Rehearsed demo script covering the benign / spoofed-voice / social-engineering / DLP-leak / combined-incident scenarios",
+        "Phase 13 complete",
+        "Updated docs/ reflecting real implementation (not the aspirational Chapter 1 baseline where they diverge)",
+        "Phase 13",
+        "Full rehearsal run-through of all demo scenarios at least twice",
+        "Every claim in the documentation is traceable to either (a) working code or (b) an explicitly labeled Future Work item — no gap between what's written and what's built"
+      ]
+    ]
+  },
+  {
+    "table_index": 36,
+    "rows": [
+      [
+        "Phase",
+        "Title",
+        "Lead(s)",
+        "Depends On",
+        "Complexity"
+      ],
+      [
+        "P0",
+        "Foundation",
+        "CS 1",
+        "None",
+        "Low-Medium"
+      ],
+      [
+        "P1",
+        "Authentication + JWT + RBAC",
+        "Cyber 1",
+        "Phase 0",
+        "Low-Medium"
+      ],
+      [
+        "P2",
+        "API Gateway + Security Middleware",
+        "Cyber 1",
+        "Phase 1",
+        "Low-Medium"
+      ],
+      [
+        "P3",
+        "DLP (Regex + Presidio + spaCy)",
+        "Cyber 2",
+        "Phase 2",
+        "Medium"
+      ],
+      [
+        "P4",
+        "Reversible Encrypted Token Mapping (Redaction)",
+        "Cyber 2",
+        "Phase 3",
+        "Medium"
+      ],
+      [
+        "P5",
+        "Policy Engine + Audit Logging",
+        "Cyber 3",
+        "Phase 4",
+        "Medium"
+      ],
+      [
+        "P6",
+        "Phase 1 Rule-Based Risk Engine",
+        "Cyber 3",
+        "Phase 5",
+        "Medium"
+      ],
+      [
+        "P7",
+        "Faster-Whisper (Speech-to-Text)",
+        "AI 2",
+        "Phase 0",
+        "Medium"
+      ],
+      [
+        "P8",
+        "RawNet2 (Voice Deepfake Detection)",
+        "AI 1",
+        "Phase 0",
+        "Medium"
+      ],
+      [
+        "P9",
+        "mBERT + Classification Head (Social Engineering)",
+        "AI 3",
+        "Phase 7 (for live-audio path)",
+        "Medium"
+      ],
+      [
+        "P10",
+        "AI Integration (FastAPI Microservice)",
+        "AI 4",
+        "Phases 3, 4, 6, 7, 8, 9",
+        "Medium"
+      ],
+      [
+        "P11",
+        "Security Dashboard",
+        "CS 2",
+        "Phase 5, Phase 10 (for live data; can demo with mocks earlier)",
+        "Medium"
+      ],
+      [
+        "P12",
+        "End-to-End Integration",
+        "CS 1",
+        "Phases 1-11",
+        "High"
+      ],
+      [
+        "P13",
+        "Security + AI + Performance Testing",
+        "Cyber 4",
+        "Phase 12",
+        "High"
+      ],
+      [
+        "P14",
+        "Final Validation + Demo",
+        "All teams",
+        "Phase 13",
+        "Medium"
+      ]
+    ]
+  },
+  {
+    "table_index": 37,
+    "rows": [
+      [
+        "Person",
+        "Phases Led / Contributed"
+      ],
+      [
+        "Cyber 1",
+        "P0 (secrets note), P1 (lead), P2 (lead)"
+      ],
+      [
+        "Cyber 2",
+        "P3 (lead), P4 (lead)"
+      ],
+      [
+        "Cyber 3",
+        "P5 (policy), P6 (lead)"
+      ],
+      [
+        "Cyber 4",
+        "P0, P2, P5 (audit), P8 (risk flag review), P10, P11, P13 (lead), P14"
+      ],
+      [
+        "AI 1",
+        "P8 (lead), P10, P13"
+      ],
+      [
+        "AI 2",
+        "P7 (lead), P10"
+      ],
+      [
+        "AI 3",
+        "P9 (lead), P13"
+      ],
+      [
+        "AI 4",
+        "P0, P3, P4, P10 (lead), P11, P13, P14"
+      ],
+      [
+        "CS 1",
+        "P0, P1, P2, P3, P4, P5, P6, P10, P11, P12 (lead), P13, P14"
+      ],
+      [
+        "CS 2",
+        "P0, P1, P5, P11 (lead), P14"
+      ]
+    ]
+  },
+  {
+    "table_index": 38,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P1",
+        "Authentication + JWT + RBAC",
+        "Design JWT claims (userId, role, exp) and short-TTL/refresh strategy"
+      ],
+      [
+        "P1",
+        "Authentication + JWT + RBAC",
+        "Implement bcrypt hashing (>=12 salt rounds), never log plaintext passwords"
+      ],
+      [
+        "P1",
+        "Authentication + JWT + RBAC",
+        "Implement RBAC middleware enforcing Employee/Analyst/Administrator"
+      ],
+      [
+        "P2",
+        "API Gateway + Security Middleware",
+        "express-rate-limit config per route class (auth vs general)"
+      ],
+      [
+        "P2",
+        "API Gateway + Security Middleware",
+        "Input-validation schema layer (Joi/Zod) on all mutating routes"
+      ]
+    ]
+  },
+  {
+    "table_index": 39,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P3",
+        "DLP (Regex + Presidio + spaCy)",
+        "Define sensitive-data categories exactly as scoped in Chapter 1 (PII, credentials, structured secrets) — no invented categories"
+      ],
+      [
+        "P3",
+        "DLP (Regex + Presidio + spaCy)",
+        "Integrate DLP scan result into the (future) policy decision contract"
+      ],
+      [
+        "P4",
+        "Reversible Encrypted Token Mapping (Redaction)",
+        "Design AES-256/Fernet key management — key must live in a KMS/secret manager, never persisted alongside model artifacts (per notebook Cell 12's explicit warning)"
+      ],
+      [
+        "P4",
+        "Reversible Encrypted Token Mapping (Redaction)",
+        "Enforce TTL-based automatic deletion of token mappings"
+      ]
+    ]
+  },
+  {
+    "table_index": 40,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P5",
+        "Policy Engine + Audit Logging",
+        "Define policy rule schema (ruleType, threshold, action)"
+      ],
+      [
+        "P6",
+        "Phase 1 Rule-Based Risk Engine",
+        "Implement weighted fusion logic"
+      ],
+      [
+        "P6",
+        "Phase 1 Rule-Based Risk Engine",
+        "Wire risk level into the Phase 5 policy engine"
+      ]
+    ]
+  },
+  {
+    "table_index": 41,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P0",
+        "Foundation",
+        "Set up .env.example with no real secrets + secret-scanning note in README"
+      ],
+      [
+        "P2",
+        "API Gateway + Security Middleware",
+        "Helmet security headers + CORS allow-list finalized"
+      ],
+      [
+        "P5",
+        "Policy Engine + Audit Logging",
+        "Append-only audit logging — no deletion path in application logic"
+      ],
+      [
+        "P5",
+        "Policy Engine + Audit Logging",
+        "Audit log integrity checks (hash chaining or equivalent)"
+      ],
+      [
+        "P10",
+        "AI Integration (FastAPI Microservice)",
+        "Security-review the internal REST contract (auth between Node backend and Python services, internal-network-only exposure)"
+      ],
+      [
+        "P11",
+        "Security Dashboard",
+        "Review that the dashboard does not leak sensitive redacted values to unauthorized roles"
+      ],
+      [
+        "P12",
+        "End-to-End Integration",
+        "Verify RBAC/audit logging holds end to end, not just per-component"
+      ],
+      [
+        "P13",
+        "Security + AI + Performance Testing",
+        "Security test cases: unauthorized access, privilege escalation, invalid/expired JWT, brute-force/rate-limit behavior, sensitive-data leakage, prompt-injection cases (OWASP-LLM01-aligned), malformed API requests, session/token abuse — each with documented input, expected output, actual result"
+      ],
+      [
+        "P14",
+        "Final Validation + Demo",
+        "Final review that no security claim in the documentation exceeds what Phase 13 actually verified"
+      ]
+    ]
+  },
+  {
+    "table_index": 42,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P8",
+        "RawNet2 (Voice Deepfake Detection)",
+        "Port the RawNet2 architecture (SincConv, FMS, ResBlock, RawNet2 classes) from notebook Cells 10-11 unchanged"
+      ],
+      [
+        "P8",
+        "RawNet2 (Voice Deepfake Detection)",
+        "Source a real ASVspoof-trained checkpoint for RAWNET2_WEIGHTS_PATH — baseline is the pretrained checkpoint; fine-tuning is optional per project rules"
+      ],
+      [
+        "P8",
+        "RawNet2 (Voice Deepfake Detection)",
+        "Remove/replace the notebook's DummyVoiceDetector fallback with a clear startup failure if no real weights are found (a silent random-score fallback must never reach production)"
+      ],
+      [
+        "P13",
+        "Security + AI + Performance Testing",
+        "Final EER for RawNet2 on real ASVspoof data (not the notebook's simulated distributions)"
+      ]
+    ]
+  },
+  {
+    "table_index": 43,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P7",
+        "Faster-Whisper (Speech-to-Text)",
+        "Wrap notebook Cell 1's AudioProcessor.preprocess_audio (resampling, top_db trimming) as a reusable module"
+      ],
+      [
+        "P7",
+        "Faster-Whisper (Speech-to-Text)",
+        "Wrap SpeechTranscriber (pretrained faster-whisper 'base' model) as a callable service"
+      ],
+      [
+        "P7",
+        "Faster-Whisper (Speech-to-Text)",
+        "Validate on a small controlled-audio sample set"
+      ]
+    ]
+  },
+  {
+    "table_index": 44,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P9",
+        "mBERT + Classification Head (Social Engineering)",
+        "Port SocialEngineeringmBERT model + SocialEngineeringDetector from notebook Cell 2"
+      ],
+      [
+        "P9",
+        "mBERT + Classification Head (Social Engineering)",
+        "Port the SMS Spam Collection loading + regex-based multi-label mapping from notebook Cell 6"
+      ],
+      [
+        "P9",
+        "mBERT + Classification Head (Social Engineering)",
+        "Port the class-weighted (pos_weight) training loop from notebook Cell 7"
+      ],
+      [
+        "P9",
+        "mBERT + Classification Head (Social Engineering)",
+        "Port per-label precision/recall/F1 evaluation from notebook Cell 8"
+      ],
+      [
+        "P9",
+        "mBERT + Classification Head (Social Engineering)",
+        "Document the domain gap: labels are proxy-derived from SMS spam text via regex, not hand-annotated call transcripts (already a stated limitation in Chapter 1 §6.5) — do not overstate accuracy"
+      ],
+      [
+        "P13",
+        "Security + AI + Performance Testing",
+        "Final per-label precision/recall/F1 for mBERT+head"
+      ]
+    ]
+  },
+  {
+    "table_index": 45,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P0",
+        "Foundation",
+        "Create data/raw, data/processed, data/evaluation folders + DATASETS.md tracking sheet"
+      ],
+      [
+        "P0",
+        "Foundation",
+        "Begin licensing verification for ASVspoof 2019/2021, WaveFake, SMS Spam Collection, Enron Email, ai4privacy/pii-masking-200k, CoNLL-2003"
+      ],
+      [
+        "P3",
+        "DLP (Regex + Presidio + spaCy)",
+        "Port Presidio default recognizers + custom API-key PatternRecognizer from notebook Cell 3"
+      ],
+      [
+        "P3",
+        "DLP (Regex + Presidio + spaCy)",
+        "Port spaCy en_core_web_lg NER pipeline (notebook Cell 0's ensure_spacy_model helper)"
+      ],
+      [
+        "P3",
+        "DLP (Regex + Presidio + spaCy)",
+        "Acquire ai4privacy/pii-masking-200k sample for evaluation (not training)"
+      ],
+      [
+        "P4",
+        "Reversible Encrypted Token Mapping (Redaction)",
+        "Port token generation + restore_response logic from notebook Cell 3"
+      ],
+      [
+        "P10",
+        "AI Integration (FastAPI Microservice)",
+        "Assemble EASP_AIService wrapper class from notebook Cell 13"
+      ],
+      [
+        "P10",
+        "AI Integration (FastAPI Microservice)",
+        "Stand up the real FastAPI app with /dlp/scan, /audio/analyze, /risk/evaluate — the notebook's own comment notes the original version was 'just a class, no app, no endpoints' and had to be fixed; verify the production port is genuinely reachable over HTTP, not just importable"
+      ],
+      [
+        "P12",
+        "End-to-End Integration",
+        "Confirm AI Integration (Phase 10) responses flow unmocked into the risk engine"
+      ],
+      [
+        "P13",
+        "Security + AI + Performance Testing",
+        "Final DLP recall/precision/FPR"
+      ],
+      [
+        "P13",
+        "Security + AI + Performance Testing",
+        "Go/no-go call on Phase 2 XGBoost+SHAP: only proceed if real analyst-labeled incident data (not notebook Cell 9's synthetic X_sim/y_sim) is actually sufficient — report the real corpus size before deciding, don't assume it in advance"
+      ],
+      [
+        "P14",
+        "Final Validation + Demo",
+        "Final measured-metrics summary compiled from evaluationResults"
+      ]
+    ]
+  },
+  {
+    "table_index": 46,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P0",
+        "Foundation",
+        "Scaffold backend/, frontend/, ai-services/, data/, docs/, tests/, docker/ folders"
+      ],
+      [
+        "P1",
+        "Authentication + JWT + RBAC",
+        "Mongoose User/Role schemas + seed default roles"
+      ],
+      [
+        "P1",
+        "Authentication + JWT + RBAC",
+        "Auth routes: POST /api/v1/auth/register, /login, GET /auth/me"
+      ],
+      [
+        "P2",
+        "API Gateway + Security Middleware",
+        "Wire middleware order into the Express app entrypoint"
+      ],
+      [
+        "P2",
+        "API Gateway + Security Middleware",
+        "Request-logging hook (pre-cursor to Phase 5 audit logging, not the audit log itself)"
+      ],
+      [
+        "P3",
+        "DLP (Regex + Presidio + spaCy)",
+        "Internal dlpClient.js to call the DLP microservice from the Node backend"
+      ],
+      [
+        "P4",
+        "Reversible Encrypted Token Mapping (Redaction)",
+        "tokenMappings Mongoose schema with TTL index"
+      ],
+      [
+        "P5",
+        "Policy Engine + Audit Logging",
+        "policies and auditLogs Mongoose collections"
+      ],
+      [
+        "P6",
+        "Phase 1 Rule-Based Risk Engine",
+        "Internal risk-evaluation endpoint plumbing"
+      ],
+      [
+        "P10",
+        "AI Integration (FastAPI Microservice)",
+        "Node backend Security Engine layer calling the FastAPI service over the internal Docker network"
+      ],
+      [
+        "P12",
+        "End-to-End Integration",
+        "Replace every mocked frontend/backend call with the real service call"
+      ],
+      [
+        "P12",
+        "End-to-End Integration",
+        "End-to-end wiring across Express routes"
+      ],
+      [
+        "P13",
+        "Security + AI + Performance Testing",
+        "Wall-clock latency measurement per pipeline stage and end-to-end, per notebook Cell 11's benchmarking structure"
+      ],
+      [
+        "P13",
+        "Security + AI + Performance Testing",
+        "Load-test harness for the latency measurement"
+      ],
+      [
+        "P14",
+        "Final Validation + Demo",
+        "Rehearsed demo script covering the benign / spoofed-voice / social-engineering / DLP-leak / combined-incident scenarios"
+      ]
+    ]
+  },
+  {
+    "table_index": 47,
+    "rows": [
+      [
+        "Phase",
+        "Phase Title",
+        "Task"
+      ],
+      [
+        "P0",
+        "Foundation",
+        "Configure linting/formatting (ESLint/Prettier for JS, black/flake8 for Python)"
+      ],
+      [
+        "P0",
+        "Foundation",
+        "Set up docker-compose skeleton (empty service stubs)"
+      ],
+      [
+        "P1",
+        "Authentication + JWT + RBAC",
+        "React login/register screens wired to the auth API"
+      ],
+      [
+        "P5",
+        "Policy Engine + Audit Logging",
+        "Admin UI stub for policy configuration"
+      ],
+      [
+        "P11",
+        "Security Dashboard",
+        "Role-aware routing (Employee vs Analyst vs Administrator views)"
+      ],
+      [
+        "P11",
+        "Security Dashboard",
+        "Dashboard components consuming audit log / incident / evaluationResults data"
+      ],
+      [
+        "P11",
+        "Security Dashboard",
+        "Enforce the 'No measured data available' fallback at the component level"
+      ]
+    ]
+  },
+  {
+    "table_index": 48,
+    "rows": [
+      [
+        "Endpoint",
+        "Owner",
+        "Phase",
+        "Type"
+      ],
+      [
+        "POST /api/v1/auth/register, /login, GET /auth/me",
+        "Cyber 1 / CS 1",
+        "1",
+        "Public"
+      ],
+      [
+        "Gateway middleware (wraps all routes)",
+        "Cyber 1 / Cyber 4",
+        "2",
+        "N/A (middleware)"
+      ],
+      [
+        "POST /dlp/scan",
+        "Cyber 2 / AI 4",
+        "3",
+        "Internal"
+      ],
+      [
+        "POST /dlp/restore",
+        "Cyber 2 / AI 4",
+        "4",
+        "Internal"
+      ],
+      [
+        "POST /internal/audit/log",
+        "Cyber 4 / CS 1",
+        "5",
+        "Internal"
+      ],
+      [
+        "POST /internal/risk/evaluate",
+        "Cyber 3 / CS 1",
+        "6",
+        "Internal"
+      ],
+      [
+        "POST /audio/transcribe",
+        "AI 2",
+        "7",
+        "Internal"
+      ],
+      [
+        "POST /audio/analyze-deepfake",
+        "AI 1",
+        "8",
+        "Internal"
+      ],
+      [
+        "POST /nlp/classify",
+        "AI 3",
+        "9",
+        "Internal"
+      ],
+      [
+        "POST /dlp/scan, /audio/analyze, /risk/evaluate (consolidated gateway)",
+        "AI 4 / CS 1",
+        "10",
+        "Internal"
+      ],
+      [
+        "GET /api/v1/incidents, /audit-logs, /metrics",
+        "CS 2 / Cyber 4",
+        "11",
+        "Public (role-restricted)"
+      ]
+    ]
+  },
+  {
+    "table_index": 49,
+    "rows": [
+      [
+        "Collection",
+        "Owner",
+        "Phase",
+        "TTL?"
+      ],
+      [
+        "users",
+        "Cyber 1 / CS 1",
+        "1",
+        "No"
+      ],
+      [
+        "roles",
+        "Cyber 1 / CS 1",
+        "1",
+        "No"
+      ],
+      [
+        "tokenMappings",
+        "Cyber 2",
+        "4",
+        "Yes — mandatory"
+      ],
+      [
+        "policies",
+        "Cyber 3 / CS 1",
+        "5",
+        "No"
+      ],
+      [
+        "auditLogs",
+        "Cyber 4 / CS 1",
+        "5",
+        "No (append-only)"
+      ],
+      [
+        "incidents",
+        "Cyber 3",
+        "6",
+        "No"
+      ],
+      [
+        "evaluationResults",
+        "AI 4",
+        "13",
+        "No"
+      ]
+    ]
+  },
+  {
+    "table_index": 50,
+    "rows": [
+      [
+        "Test Area",
+        "Owner",
+        "Phase(s)"
+      ],
+      [
+        "Auth/RBAC test cases",
+        "Cyber 1",
+        "1"
+      ],
+      [
+        "Gateway/rate-limit/validation tests",
+        "Cyber 1 / Cyber 4",
+        "2"
+      ],
+      [
+        "DLP recall/precision/FPR",
+        "AI 4",
+        "3, 13"
+      ],
+      [
+        "Redaction round-trip / TTL",
+        "Cyber 2",
+        "4"
+      ],
+      [
+        "Policy/audit integrity tests",
+        "Cyber 4",
+        "5"
+      ],
+      [
+        "Risk-fusion combined-incident scenarios",
+        "Cyber 3",
+        "6, 12"
+      ],
+      [
+        "Whisper transcription smoke test",
+        "AI 2",
+        "7"
+      ],
+      [
+        "RawNet2 EER/ROC-AUC (real ASVspoof)",
+        "AI 1",
+        "8, 13"
+      ],
+      [
+        "mBERT per-label precision/recall/F1",
+        "AI 3",
+        "9, 13"
+      ],
+      [
+        "AI Integration live-HTTP tests",
+        "AI 4 / CS 1",
+        "10"
+      ],
+      [
+        "Dashboard role-visibility / fallback tests",
+        "CS 2",
+        "11"
+      ],
+      [
+        "End-to-end scenario re-run",
+        "CS 1 (all teams)",
+        "12"
+      ],
+      [
+        "Formal security test suite (OWASP-LLM01-aligned)",
+        "Cyber 4",
+        "13"
+      ],
+      [
+        "Latency/performance benchmark",
+        "CS 1",
+        "13"
+      ],
+      [
+        "Final rehearsal",
+        "All teams",
+        "14"
+      ]
+    ]
+  },
+  {
+    "table_index": 51,
+    "rows": [
+      [
+        "Risk",
+        "Impact",
+        "Mitigation",
+        "Phase(s)"
+      ],
+      [
+        "Missing AI Subsystem Proposal & SRS v2.1 — some implementation-level specifics unverified",
+        "Medium",
+        "Re-check Phases 7-10 once the document is supplied",
+        "7-10"
+      ],
+      [
+        "Notebook's Phase 1 risk weights/threshold are not academically approved",
+        "Medium",
+        "Explicit sign-off required before Phase 6 is marked done",
+        "6"
+      ],
+      [
+        "mBERT classifier trained on SMS-spam-derived proxy labels, domain gap vs. real call transcripts",
+        "Medium-High",
+        "Documented limitation carried into the final report, not hidden",
+        "9, 13"
+      ],
+      [
+        "No GPU confirmed available",
+        "Medium",
+        "CPU-fallback path is a hard acceptance criterion for every model service",
+        "7, 8, 9"
+      ],
+      [
+        "Notebook's XGBoost/synthetic-incident data is circular and not usable as-is",
+        "Medium",
+        "Phase 2 go/no-go explicitly gated on real analyst-labeled data at Phase 13",
+        "13"
+      ],
+      [
+        "Team-generated synthetic labeled data may be too small for meaningful evaluation",
+        "Medium",
+        "Actual corpus size reported at the end of labeling, not assumed in advance",
+        "9, 13"
+      ],
+      [
+        "Integration risk concentrated at the single end-to-end wiring phase",
+        "High",
+        "Feature freeze around Phase 12; all-hands on integration bugs",
+        "12"
+      ],
+      [
+        "Documentation drift from Chapter 1's aspirational baseline vs. what is actually built",
+        "Medium",
+        "Named documentation-accuracy owner at Phase 14; every claim traced to code or Future Work",
+        "14"
+      ]
+    ]
+  }
+]

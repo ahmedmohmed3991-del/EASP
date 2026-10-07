@@ -1,0 +1,628 @@
+ENTERPRISE AI SECURITY PLATFORM
+EASP
+Complete Implementation Roadmap
+Task Dependency Tree, Project Timeline, Team Responsibilities and GitHub Workflow
+GRADUATION PROJECT
+Egyptian Chinese University
+Team Structure: Cybersecurity  •  AI / Data Science  •  Computer Science
+GITHUB REPOSITORY
+https://github.com/ahmedmohmed3991-del/EASP
+Version 1.0
+Table of Contents
+1. Implementation Overview
+The Enterprise AI Security Platform (EASP) is implemented across fifteen sequential and parallel phases, Phase 0 through Phase 14, moving from foundational tooling through authentication, data-loss prevention, AI model integration, dashboarding, end-to-end wiring, formal testing, and final validation.
+Every task in every phase follows the same mandatory lifecycle before it is considered finished:
+IMPLEMENT
+↓
+RUN
+↓
+TEST
+↓
+FIX
+↓
+VERIFY
+↓
+DOCUMENT
+↓
+COMMIT
+Writing the code alone does not mean the task is completed.
+A task is complete only after implementation, testing, verification, documentation, and Git commit/review — not before.
+3. Complete Vertical Implementation Tree
+Every task in the sequence below is shown with its official Task ID, owner, and dependency, exactly as recorded in the Team Implementation Task Book. Phases 7 and 8 run in parallel with Phases 1–6 (no backend dependency); Phase 9 depends on Phase 7; Phase 10 depends on Phases 3, 4, 6, 7, 8 and 9 jointly.
+EASP IMPLEMENTATION ROADMAP
+↓
+PHASE 0 — FOUNDATION
+↓
+T-P00-001  Set up .env.example with no real secrets + secret-scanning note in README
+Owner: Cyber 4      Dependency: None
+↓
+T-P00-002  Create data/raw, data/processed, data/evaluation folders + DATASETS.md tracking sheet
+Owner: AI 4      Dependency: None
+↓
+T-P00-003  Begin licensing verification for ASVspoof, WaveFake, SMS Spam Collection, Enron Email, pii-masking-200k, CoNLL-2003
+Owner: AI 4      Dependency: None
+↓
+T-P00-004  Scaffold backend/, frontend/, ai-services/, data/, docs/, tests/, docker/ folders
+Owner: CS 1      Dependency: None
+↓
+T-P00-005  Configure linting/formatting (ESLint/Prettier for JS, black/flake8 for Python)
+Owner: CS 2      Dependency: None
+↓
+T-P00-006  Set up docker-compose skeleton (empty service stubs)
+Owner: CS 2      Dependency: None
+↓
+✓  PHASE 0 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 1 — AUTHENTICATION + JWT + RBAC
+↓
+T-P01-007  Design JWT claims (userId, role, exp) and short-TTL/refresh strategy
+Owner: Cyber 1      Dependency: Phase 0
+↓
+T-P01-008  Implement bcrypt hashing (≥12 salt rounds); never log plaintext passwords
+Owner: Cyber 1      Dependency: Phase 0
+↓
+T-P01-009  Implement RBAC middleware enforcing Employee / Analyst / Administrator
+Owner: Cyber 1      Dependency: Phase 0
+↓
+T-P01-010  Mongoose User/Role schemas + seed default roles
+Owner: CS 1      Dependency: Phase 0
+↓
+T-P01-011  Auth routes: POST /api/v1/auth/register, /login, GET /auth/me
+Owner: CS 1      Dependency: Phase 0
+↓
+T-P01-012  React login/register screens wired to the auth API
+Owner: CS 2      Dependency: Phase 0
+↓
+✓  PHASE 1 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 2 — API GATEWAY + SECURITY MIDDLEWARE
+↓
+T-P02-013  express-rate-limit config per route class (auth vs general)
+Owner: Cyber 1      Dependency: Phase 1
+↓
+T-P02-014  Helmet security headers + CORS allow-list finalized
+Owner: Cyber 4      Dependency: Phase 1
+↓
+T-P02-015  Input-validation schema layer (Joi/Zod) on all mutating routes
+Owner: Cyber 1      Dependency: Phase 1
+↓
+T-P02-016  Wire middleware order into the Express app entrypoint
+Owner: CS 1      Dependency: Phase 1
+↓
+T-P02-017  Request-logging hook (precursor to Phase 5 audit logging)
+Owner: CS 1      Dependency: Phase 1
+↓
+✓  PHASE 2 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 3 — DLP (REGEX + PRESIDIO + SPACY)
+↓
+T-P03-018  Define sensitive-data categories exactly as scoped in Chapter 1 (PII, credentials, structured secrets)
+Owner: Cyber 2      Dependency: Phase 2
+↓
+T-P03-019  Integrate DLP scan result into the (future) policy decision contract
+Owner: Cyber 2      Dependency: Phase 2
+↓
+T-P03-020  Port Presidio default recognizers + custom API-key PatternRecognizer
+Owner: AI 4      Dependency: Phase 2
+↓
+T-P03-021  Port spaCy en_core_web_lg NER pipeline
+Owner: AI 4      Dependency: Phase 2
+↓
+T-P03-022  Acquire ai4privacy/pii-masking-200k sample for evaluation (not training)
+Owner: AI 4      Dependency: Phase 2
+↓
+T-P03-023  Internal dlpClient.js to call the DLP microservice from the Node backend
+Owner: CS 1      Dependency: Phase 2
+↓
+✓  PHASE 3 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 4 — REVERSIBLE ENCRYPTED TOKEN MAPPING (REDACTION)
+↓
+T-P04-024  Design AES-256/Fernet key management — key lives in a KMS/secret manager, never persisted alongside model artifacts
+Owner: Cyber 2      Dependency: Phase 3
+↓
+T-P04-025  Enforce TTL-based automatic deletion of token mappings
+Owner: Cyber 2      Dependency: Phase 3
+↓
+T-P04-026  Port token generation + restore_response logic
+Owner: AI 4      Dependency: Phase 3
+↓
+T-P04-027  tokenMappings Mongoose schema with TTL index
+Owner: CS 1      Dependency: Phase 3
+↓
+✓  PHASE 4 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 5 — POLICY ENGINE + AUDIT LOGGING
+↓
+T-P05-028  Define policy rule schema (ruleType, threshold, action)
+Owner: Cyber 3      Dependency: Phase 4
+↓
+T-P05-029  Append-only audit logging — no deletion path in application logic
+Owner: Cyber 4      Dependency: Phase 4
+↓
+T-P05-030  Audit log integrity checks (hash chaining or equivalent)
+Owner: Cyber 4      Dependency: Phase 4
+↓
+T-P05-031  policies and auditLogs Mongoose collections
+Owner: CS 1      Dependency: Phase 4
+↓
+T-P05-032  Admin UI stub for policy configuration
+Owner: CS 2      Dependency: Phase 4
+↓
+✓  PHASE 5 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 6 — PHASE 1 RULE-BASED RISK ENGINE
+↓
+T-P06-033  Implement weighted fusion logic
+Owner: Cyber 3      Dependency: Phase 5
+↓
+T-P06-034  Wire risk level into the Phase 5 policy engine
+Owner: Cyber 3      Dependency: Phase 5
+↓
+T-P06-035  Internal risk-evaluation endpoint plumbing
+Owner: CS 1      Dependency: Phase 5
+↓
+✓  PHASE 6 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 7 — FASTER-WHISPER (SPEECH-TO-TEXT)
+↓
+T-P07-036  Wrap AudioProcessor.preprocess_audio (resampling, top_db trimming) as a reusable module
+Owner: AI 2      Dependency: Phase 0 (parallel)
+↓
+T-P07-037  Wrap SpeechTranscriber (pretrained faster-whisper 'base' model) as a callable service
+Owner: AI 2      Dependency: Phase 0 (parallel)
+↓
+T-P07-038  Validate on a small controlled-audio sample set
+Owner: AI 2      Dependency: Phase 0 (parallel)
+↓
+✓  PHASE 7 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 8 — RAWNET2 (VOICE DEEPFAKE DETECTION)
+↓
+T-P08-039  Port the RawNet2 architecture (SincConv, FMS, ResBlock, RawNet2 classes) unchanged
+Owner: AI 1      Dependency: Phase 0 (parallel)
+↓
+T-P08-040  Source a real ASVspoof-trained checkpoint for RAWNET2_WEIGHTS_PATH
+Owner: AI 1      Dependency: Phase 0 (parallel)
+↓
+T-P08-041  Remove/replace the DummyVoiceDetector fallback with a clear startup failure if no real weights are found
+Owner: AI 1      Dependency: Phase 0 (parallel)
+↓
+✓  PHASE 8 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 9 — MBERT + CLASSIFICATION HEAD (SOCIAL ENGINEERING)
+↓
+T-P09-042  Port SocialEngineeringmBERT model + SocialEngineeringDetector
+Owner: AI 3      Dependency: Phase 7
+↓
+T-P09-043  Port the SMS Spam Collection loading + regex-based multi-label mapping
+Owner: AI 3      Dependency: Phase 7
+↓
+T-P09-044  Port the class-weighted (pos_weight) training loop
+Owner: AI 3      Dependency: Phase 7
+↓
+T-P09-045  Port per-label precision/recall/F1 evaluation
+Owner: AI 3      Dependency: Phase 7
+↓
+T-P09-046  Document the domain gap: labels are proxy-derived from SMS spam text, not hand-annotated call transcripts
+Owner: AI 3      Dependency: Phase 7
+↓
+✓  PHASE 9 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 10 — AI INTEGRATION (FASTAPI MICROSERVICE)
+↓
+T-P10-047  Security-review the internal REST contract (auth between Node backend and Python services, internal-network-only exposure)
+Owner: Cyber 4      Dependency: Phases 3,4,6,7,8,9
+↓
+T-P10-048  Assemble EASP_AIService wrapper class
+Owner: AI 4      Dependency: Phases 3,4,6,7,8,9
+↓
+T-P10-049  Stand up the real FastAPI app with /dlp/scan, /audio/analyze, /risk/evaluate
+Owner: AI 4      Dependency: Phases 3,4,6,7,8,9
+↓
+T-P10-050  Node backend Security Engine layer calling the FastAPI service over the internal Docker network
+Owner: CS 1      Dependency: Phases 3,4,6,7,8,9
+↓
+✓  PHASE 10 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 11 — SECURITY DASHBOARD
+↓
+T-P11-051  Review that the dashboard does not leak sensitive redacted values to unauthorized roles
+Owner: Cyber 4      Dependency: Phase 5, Phase 10
+↓
+T-P11-052  Role-aware routing (Employee vs Analyst vs Administrator views)
+Owner: CS 2      Dependency: Phase 5, Phase 10
+↓
+T-P11-053  Dashboard components consuming audit log / incident / evaluationResults data
+Owner: CS 2      Dependency: Phase 5, Phase 10
+↓
+T-P11-054  Enforce the 'No measured data available' fallback at the component level
+Owner: CS 2      Dependency: Phase 5, Phase 10
+↓
+✓  PHASE 11 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 12 — END-TO-END INTEGRATION
+↓
+T-P12-055  Verify RBAC/audit logging holds end to end, not just per-component
+Owner: Cyber 4      Dependency: Phases 1–11
+↓
+T-P12-056  Confirm AI Integration (Phase 10) responses flow unmocked into the risk engine
+Owner: AI 4      Dependency: Phases 1–11
+↓
+T-P12-057  Replace every mocked frontend/backend call with the real service call
+Owner: CS 1      Dependency: Phases 1–11
+↓
+T-P12-058  End-to-end wiring across Express routes
+Owner: CS 1      Dependency: Phases 1–11
+↓
+✓  PHASE 12 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 13 — SECURITY + AI + PERFORMANCE TESTING
+↓
+T-P13-059  Security test cases: unauthorized access, privilege escalation, invalid/expired JWT, brute-force/rate-limit, sensitive-data leakage, prompt-injection (OWASP-LLM01-aligned)
+Owner: Cyber 4      Dependency: Phase 12
+↓
+T-P13-060  Final EER for RawNet2 on real ASVspoof data (not simulated distributions)
+Owner: AI 1      Dependency: Phase 12
+↓
+T-P13-061  Final per-label precision/recall/F1 for mBERT+head
+Owner: AI 3      Dependency: Phase 12
+↓
+T-P13-062  Final DLP recall/precision/FPR
+Owner: AI 4      Dependency: Phase 12
+↓
+T-P13-063  Go/no-go call on Phase 2 XGBoost+SHAP (real analyst-labeled data only)
+Owner: AI 4      Dependency: Phase 12
+↓
+T-P13-064  Wall-clock latency measurement per pipeline stage and end-to-end
+Owner: CS 1      Dependency: Phase 12
+↓
+T-P13-065  Load-test harness for the latency measurement
+Owner: CS 1      Dependency: Phase 12
+↓
+✓  PHASE 13 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+↓
+PHASE 14 — FINAL VALIDATION + DEMO
+↓
+T-P14-066  Final review that no security claim in the documentation exceeds what Phase 13 actually verified
+Owner: Cyber 4      Dependency: Phase 13
+↓
+T-P14-067  Final measured-metrics summary compiled from evaluationResults
+Owner: AI 4      Dependency: Phase 13
+↓
+T-P14-068  Rehearsed demo script covering benign / spoofed-voice / social-engineering / DLP-leak / combined-incident scenarios
+Owner: CS 1      Dependency: Phase 13
+↓
+✓  PHASE 14 COMPLETED
+Acceptance Criteria Passed   •   Tasks Verified   •   Documentation Updated   •   Git Checkpoint Ready
+6. Parallel Development Flow
+Derived directly from the Task Book's Phase Dependency Graph (Section 10). Three tracks run independently after Phase 0 and converge at Phase 10.
+SEQUENTIAL BACKBONE
+P0 Foundation
+↓
+P1 Auth/RBAC
+↓
+P2 API Gateway
+↓
+P3 DLP
+↓
+P4 Redaction
+↓
+P5 Policy/Audit
+↓
+P6 Risk Engine
+PARALLEL AI TRACK (starts at Phase 0, no backend dependency)
+P7 Faster-Whisper
+↓
+P9 mBERT + Head
+P8 RawNet2
+CONVERGENCE — ALL TRACKS MEET AT AI INTEGRATION
+Phase 10 (AI Integration) requires Phases 3, 4, 6, 7, 8 and 9 to be independently functional and tested before wiring begins.
+P10 AI Integration (FastAPI)
+↓
+P11 Security Dashboard
+↓
+P12 End-to-End Integration
+↓
+P13 Security + AI + Performance Testing
+↓
+P14 Final Validation + Demo
+5. Master Phase Summary
+Phase
+Phase Name
+Main Objective
+Lead Owner
+Dependencies
+P0
+Foundation
+Establish the monorepo skeleton, tooling, environment baseline, and parallel Data Preparation track. No business logic is written.
+CS 1
+None (starting phase)
+P1
+Authentication + JWT + RBAC
+Working login/registration, JWT issuance, bcrypt password hashing, and role-based middleware (Employee / Analyst / Administrator).
+Cyber 1 / CS 1
+Phase 0
+P2
+API Gateway + Security Middleware
+Central request pipeline in front of every route: rate limiting, input validation, security headers, CORS allow-list, request-logging hook.
+Cyber 1 / CS 1
+Phase 1
+P3
+DLP (Regex + Presidio + spaCy)
+A DLP scanning service that detects PII, credentials, and structured secrets in text using Regex, Microsoft Presidio, and spaCy NER, split from the redaction/restore half (Phase 4).
+Cyber 2 / AI 4
+Phase 2
+P4
+Reversible Encrypted Token Mapping (Redaction)
+Full reversible-redaction lifecycle: encrypt detected entities into tokens, store a token map, and restore original values in the AI response.
+Cyber 2
+Phase 3
+P5
+Policy Engine + Audit Logging
+A policy engine that turns a risk level into an enforcement action (Allow / Escalate / Block), plus an append-only audit log of every security decision.
+Cyber 3 / Cyber 4
+Phase 4
+P6
+Phase 1 Rule-Based Risk Engine
+Deterministic weighted-rule fusion of the voice-authenticity score, social-engineering score, and DLP sensitivity score into a single risk level.
+Cyber 3
+Phase 5
+P7
+Faster-Whisper (Speech-to-Text)
+A speech-to-text microservice using the pretrained Faster-Whisper model, exposed for the mBERT social-engineering pipeline to consume.
+AI 2
+Phase 0 (parallel track)
+P8
+RawNet2 (Voice Deepfake Detection)
+A voice-authenticity classifier using the pretrained RawNet2 anti-spoofing model (SincConv + FMS + ResBlock + GRU), with a validated CPU fallback.
+AI 1
+Phase 0 (parallel track)
+P9
+mBERT + Classification Head (Social Engineering)
+A multi-label social-engineering classifier: pretrained mBERT encoder (bert-base-multilingual-cased) plus a project-specific classification head.
+AI 3
+Phase 7
+P10
+AI Integration (FastAPI Microservice)
+A single FastAPI microservice wrapping DLP, voice-deepfake, transcription, and social-engineering components behind three production endpoints, consumed by the Node.js backend's Security Engine layer.
+AI 4 / CS 1
+Phases 3, 4, 6, 7, 8, 9
+P11
+Security Dashboard
+A role-aware React dashboard distinguishing Detected Event / Risk Level / Policy Action / Model Result / Measured Performance, with a hard rule that any unmeasured metric renders as 'No measured data available.'
+CS 2
+Phase 5, Phase 10
+P12
+End-to-End Integration
+Wire every prior phase into one live pipeline: prompt/voice in → DLP/AI analysis → risk fusion → policy decision → audit log → dashboard update, replacing all mocked responses with real service calls.
+CS 1 (all teams)
+Phases 1–11
+P13
+Security + AI + Performance Testing
+Formal test pass: cybersecurity test cases, AI/data-science evaluation (final EER, F1, DLP recall/precision/FPR), and end-to-end latency measurement against the ≤3s target.
+Cyber 4 (all teams contribute)
+Phase 12
+P14
+Final Validation + Demo
+Defense-ready state: rehearsed demo script, all documentation synchronized with what was actually built, final measured-metrics summary.
+CS 1 / Cyber 4 / AI 4
+Phase 13
+7. Proposed Project Timeline
+Proposed Estimated Project Timeline — a project-management estimate for planning purposes, not an official duration mandated by the Task Book.
+Phase
+W1
+W2
+W3
+W4
+W5
+W6
+W7
+W8
+W9
+W10
+W11
+W12
+W13
+W14
+W15
+W16
+P0 Foundation
+P1 Authentication + JWT + RBAC
+P2 API Gateway + Security Middleware
+P3 DLP (Regex + Presidio + spaCy)
+P4 Reversible Encrypted Token Mapping (Redaction)
+P5 Policy Engine + Audit Logging
+P6 Phase 1 Rule-Based Risk Engine
+P7 Faster-Whisper (Speech-to-Text)
+P8 RawNet2 (Voice Deepfake Detection)
+P9 mBERT + Classification Head (Social Engineering)
+P10 AI Integration (FastAPI Microservice)
+P11 Security Dashboard
+P12 End-to-End Integration
+P13 Security + AI + Performance Testing
+P14 Final Validation + Demo
+Legend
+Foundation
+Cybersecurity / Backend Work
+AI / Data Science Work
+Computer Science / Dashboard / Integration Work
+Testing and Final Validation
+8. Team Responsibility Map
+Cybersecurity Team
+Cyber 1
+Phases 0–2
+Authentication, JWT, RBAC
+Login/registration flow, JWT issuance, bcrypt hashing, RBAC middleware, rate-limiting and input-validation config
+Cyber 2
+Phases 3–4
+DLP, Data Security, Redaction
+Sensitive-data category definitions, DLP→policy contract, AES-256/Fernet key management (KMS), token-mapping TTL
+Cyber 3
+Phases 5–6
+Risk Engine, Policy Engine
+Policy rule schema, weighted risk-fusion logic, wiring risk level into the policy engine
+Cyber 4
+Phases 0–14
+Security Testing, Audit Security
+Security headers/CORS, append-only audit logging + integrity checks, REST-contract security review, formal OWASP-aligned test suite, final documentation-accuracy review
+AI / Data Science Team
+AI 1
+Phases 8, 13
+RawNet2, Voice Deepfake Detection
+Ports RawNet2 architecture, sources a real ASVspoof-trained checkpoint, removes unsafe dummy fallback, measures final EER
+AI 2
+Phase 7
+Faster-Whisper, Speech-to-Text
+Wraps AudioProcessor preprocessing and SpeechTranscriber as a callable service, validates on controlled audio
+AI 3
+Phase 9, 13
+mBERT, Classification Head, Social Engineering
+Ports mBERT model + detector, label mapping, class-weighted training loop, per-label evaluation, final F1
+AI 4
+Phases 0, 3–4, 10, 12–14
+AI Integration, FastAPI, Data Science Integration
+Dataset folder setup, Presidio/spaCy porting, token-restore logic, EASP_AIService FastAPI wrapper, final DLP metrics and measured-metrics summary
+Computer Science Team
+CS 1
+Phases 0–14 (lead)
+Backend, Express, APIs, Integration
+Repo scaffolding, Mongoose schemas, auth/routing wiring, DLP client, risk-evaluation endpoint, Node↔FastAPI Security Engine layer, end-to-end wiring, latency benchmarking, demo script
+CS 2
+Phases 0–1, 5, 11
+Frontend, React, MongoDB, Docker/DevOps
+Linting/docker-compose setup, React auth screens, policy admin UI stub, role-aware dashboard routing and components, 'No measured data' fallback
+9. GitHub Collaboration System
+Repository: https://github.com/ahmedmohmed3991-del/EASP
+Branch Structure
+feature/<component-or-task>
+↑
+develop
+↑
+main
+main  Stable and approved project versions only.
+develop  Main team integration branch.
+feature/*  Individual development branches for specific tasks/components.
+Example Feature Branches (by component)
+feature/auth-rbac
+feature/api-gateway
+feature/dlp-engine
+feature/rawnet2-service
+feature/whisper-service
+feature/social-engineering
+feature/security-dashboard
+10. Step-by-Step GitHub Workflow
+First Time
+git clone https://github.com/ahmedmohmed3991-del/EASP.git
+cd EASP
+git checkout develop
+git pull origin develop
+Start a New Task
+git checkout develop
+git pull origin develop
+git checkout -b feature/task-name
+Work Lifecycle
+IMPLEMENT
+↓
+RUN
+↓
+TEST
+↓
+FIX
+↓
+VERIFY
+↓
+DOCUMENT
+Save Work
+git status
+git add .
+git commit -m "feat: meaningful task description"
+git push origin feature/task-name
+Integration Workflow
+Feature Branch
+↓
+Push to GitHub
+↓
+Pull Request
+↓
+Team Review
+↓
+Merge into develop
+Rules
+No direct push to main
+No secrets or .env files
+No task is complete without testing
+Use .env.example
+Use Pull Requests
+Another team member should review important work before merging
+11. Phase Checkpoints
+After a phase is fully completed, the following sequence runs before the next phase starts:
+All Tasks Completed
+↓
+Acceptance Criteria Passed
+↓
+Peer Verification
+↓
+Documentation Updated
+↓
+Merged into develop
+↓
+Create Git Tag / Checkpoint
+↓
+Start Next Phase
+Git Checkpoint Tags
+One tag per phase, applied to develop once that phase's acceptance criteria pass:
+phase-00-foundation  →  phase-01-auth-rbac  →  phase-02-api-gateway  →  phase-03-dlp  →  phase-04-redaction  →  phase-05-policy-audit  →  phase-06-risk-engine  →  phase-07-whisper  →  phase-08-rawnet2  →  phase-09-mbert  →  phase-10-ai-integration  →  phase-11-dashboard  →  phase-12-integration  →  phase-13-testing  →  phase-14-final-demo
+12. Definition of Done
+A TASK IS NOT COMPLETE WHEN CODE IS WRITTEN.
+A task is complete only when:
+✓  Implemented
+✓  Runs Successfully
+✓  Tested
+✓  Issues Fixed
+✓  Verified
+✓  Documented
+✓  Committed
+✓  Reviewed When Required
+13. Final Execution Roadmap
+FOUNDATION
+↓
+IDENTITY & ACCESS
+↓
+API SECURITY
+↓
+DLP
+↓
+REVERSIBLE REDACTION
+↓
+POLICY & AUDIT
+↓
+RISK ENGINE
+↓
+AI COMPONENTS (WHISPER + RAWNET2 + mBERT)
+↓
+AI INTEGRATION
+↓
+SECURITY DASHBOARD
+↓
+END-TO-END INTEGRATION
+↓
+TESTING
+↓
+FINAL VALIDATION
+↓
+EASP FINAL DEMO

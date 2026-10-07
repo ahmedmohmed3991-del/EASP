@@ -1,0 +1,6 @@
+@EASP.API_HostAddress = http://localhost:5122
+
+GET {{EASP.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
