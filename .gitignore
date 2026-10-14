@@ -9,6 +9,12 @@ npm-debug.log*
 dist/
 build/
 
+# .NET
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
 # Python
 __pycache__/
 *.pyc
@@ -27,3 +33,11 @@ venv/
 # Logs
 *.log
 logs/
+
+# Temporary and scratch test files
+scratch/
+
+# Large Neural Network Weights (>100MB rejected by GitHub)
+*.safetensors
+*.bin
+ai_service/models/wav2vec2_large_xlsr/

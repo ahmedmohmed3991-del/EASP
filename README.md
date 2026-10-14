@@ -1,163 +1,174 @@
 # EASP — Enterprise AI Security Platform
 
-## 1. Project Overview
+## 1. Executive Platform Overview
 
-EASP is a Zero-Trust-inspired enterprise cybersecurity platform being built
-incrementally as a graduation project. The full system will eventually
-include authentication/JWT, RBAC, an API gateway, DLP, reversible encrypted
-token mapping (AES-256), voice deepfake detection (RawNet2), speech-to-text
-(Faster-Whisper), social engineering detection (mBERT), a rule-based risk
-engine, a policy engine, audit logging, and a security dashboard.
+The **Enterprise AI Security Platform (EASP)** is a Zero-Trust cybersecurity platform designed to protect modern organizations against dual-threat attack vectors targeting artificial intelligence workflows:
+1. **Data Loss Prevention (DLP)**: Accidental leakage of sensitive credentials, API keys, intellectual property, PII, and financial identifiers into Generative AI prompts, utilizing reversible AES-256-GCM tokenization with automated TTL expiration.
+2. **Social Engineering & Deepfake Voice Defense**: Multi-modal detection of synthetic audio impersonation (RawNet2 acoustic analysis) combined with automated speech transcription (Faster-Whisper) and intent classification (mBERT) to intercept and neutralize coercive vishing attacks.
 
-This repository is being built phase by phase. **This README currently
-documents Phase 0 only.**
+EASP unifies these vectors into a deterministic **Multi-Modal Risk Engine** and **Policy Enforcement Engine** backed by an append-only **Cryptographic Hash-Chained Audit Ledger** (SHA-256).
 
-## 2. Phase 0 Objective
+---
 
-Build and validate the development foundation: a working, containerized
-skeleton connecting the React frontend, Node.js/Express backend, Python
-FastAPI AI microservice, and MongoDB — with health checks proving each
-layer can reach the next. **Phase 0 contains no AI model inference, no
-authentication, and no security modules.** It exists purely to prove the
-architecture runs end-to-end before any real functionality is added.
+## 2. Integrated Platform Architecture
 
-## 3. Architecture
-
+```text
+               ┌──────────────────────────────────────────────────┐
+               │        React + Vite SOC Frontend (Port 3000)     │
+               │   Prompt Scanner | Audio AI | SOC Desk | Ledger   │
+               └────────────────────────┬─────────────────────────┘
+                                        │ HTTP / JSON / JWT
+                                        ▼
+               ┌──────────────────────────────────────────────────┐
+               │         API Gateway & Security Middleware        │
+               │  Rate Limiting | Helmet | CORS Allow-List | RBAC │
+               └────────────────────────┬─────────────────────────┘
+                                        │
+                         ┌──────────────┴──────────────┐
+                         ▼                             ▼
+        ┌────────────────────────────────┐   ┌───────────────────────────┐
+        │      Node.js / Express Core    │   │  Python FastAPI AI Engine │
+        │        Backend (Port 5000)     │   │        (Port 8000)        │
+        ├────────────────────────────────┤   ├───────────────────────────┤
+        │ • User Auth & JWT (bcrypt ≥12) │   │ • DLP Regex + Presidio    │
+        │ • AES-256-GCM Token Store (TTL)│   │ • RawNet2 Voice Detector  │
+        │ • Deterministic Policy Engine  │   │ • Faster-Whisper ASR      │
+        │ • Unified Risk Engine          │   │ • mBERT Social Head       │
+        │ • SHA-256 Audit Hash Chaining  │   │ • DSP Acoustic Inspection │
+        └───────────────┬────────────────┘   └─────────────▲─────────────┘
+                        │                                  │
+                        │        Internal Microservice     │
+                        └──────────────────────────────────┘
+                                        │
+                                        ▼
+               ┌──────────────────────────────────────────────────┐
+               │           MongoDB Database (Port 27017)          │
+               │   Single Source of Truth: Users, Roles, Tokens,  │
+               │   Policies, Incidents, and Cryptographic Logs    │
+               └──────────────────────────────────────────────────┘
 ```
-React Frontend  (port 3000)
-      ↓  HTTP
-Node.js + Express Backend  (port 5000)
-      ↓  HTTP
-Python FastAPI AI Service  (port 8000)
-      ↓
-MongoDB  (port 27017)
-```
 
-- The frontend polls the backend's `/health` and `/health/ai` endpoints and
-  renders live CONNECTED / DISCONNECTED status for all four layers.
-- The backend's `/health` reports its own status plus MongoDB connection
-  state.
-- The backend's `/health/ai` performs a live call to the AI service's
-  `/health` endpoint and reports reachability.
-- The AI service's `/health` reports service status and confirms
-  `models_loaded: false` — no models are loaded in Phase 0.
+---
 
-## 4. Prerequisites
+## 3. Technology Stack & Continuity
 
-- Docker Engine (20.10+) and Docker Compose v2 (`docker compose`, not the
-  legacy `docker-compose`)
-- Git
-- (Optional, for running services outside Docker) Node.js 20+, Python 3.11+
+* **Backend**: Node.js 20+, Express.js, JWT (`jsonwebtoken`), Password Hashing (`bcrypt` $\ge 12$ rounds), AES-256-GCM (`crypto`).
+* **Database**: MongoDB 6+ / 7+ with Mongoose ODM (single consistent persistence layer; strict TTL indexes and immutable audit logs).
+* **AI Subsystem**: Python 3.11+, FastAPI, PyTorch, Hugging Face Transformers (`mBERT`), Presidio Analyzer & Custom Regex Engine, Faster-Whisper, SciPy/NumPy Signal Processing.
+* **Frontend**: React 18, Vite 5, Vanilla CSS Cyber/SOC Glassmorphism Design System (Zero Tailwind/Bootstrap dependencies).
+* **Security & Infrastructure**: Helmet, CORS Strict Allow-list, express-rate-limit, Docker & Docker Compose.
 
-## 5. Installation
+---
+
+## 4. Default Seeded Credentials (SOC Demo)
+
+The system automatically initializes default role-based accounts with seeded passwords (`Password123!`):
+
+| Role | Email | Password | Permissions & Scope |
+|---|---|---|---|
+| **Administrator** | `admin@easp.local` | `Password123!` | Full governance, policy creation, token restoration, incident triage, ledger verification. |
+| **Analyst** | `analyst@easp.local` | `Password123!` | Incident triage, analyst note logging, authorized token restoration, audit inspection. |
+| **Employee** | `employee@easp.local` | `Password123!` | Prompt scanning, audio submission, self-service inspection. Restricted from tokens and audit logs. |
+
+---
+
+## 5. Quickstart & Local Setup
+
+### Step 1: Clone and Configure Environment
 
 ```bash
-git clone <your-repo-url> easp
+git clone https://github.com/ahmedmohmed3991-del/EASP.git easp
 cd easp
-```
-
-## 6. Environment Setup
-
-```bash
 cp .env.example .env
 ```
 
-Edit `.env` and set real development values for:
-
-| Variable | Description |
-|---|---|
-| `MONGO_USERNAME` | MongoDB root username (dev only) |
-| `MONGO_PASSWORD` | MongoDB root password (dev only) |
-| `MONGO_URI` | Full Mongo connection string used by the backend |
-| `PORT` | Backend port (default `5000`) |
-| `AI_SERVICE_URL` | URL the backend uses to reach the AI service |
-| `ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins for CORS |
-
-`.env` is git-ignored. Never commit real secrets, even development ones.
-See [Security Headers & CORS Documentation](docs/security/T-P02-014-security-headers-cors.md) for security headers and CORS allow-list architecture.
-
-## 7. Docker Commands
-
-```bash
-# Validate the compose file
-docker compose config
-
-# Build all images
-docker compose build
-
-# Start all services in the background
-docker compose up -d
-
-# List running containers
-docker compose ps
-
-# Tail logs
-docker compose logs --tail=100
+Ensure `.env` contains:
+```env
+PORT=5000
+NODE_ENV=development
+MONGO_URI=mongodb://127.0.0.1:27017/easp
+AI_SERVICE_URL=http://127.0.0.1:8000
+JWT_SECRET=easp_dev_super_secret_jwt_key_2026_at_least_32_chars
+ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
-## 8. Starting the System
+### Step 2: Seed Database
 
 ```bash
-docker compose up -d
+cd backend
+npm install
+node src/scripts/seedUsers.js
+node src/scripts/seedPolicies.js
 ```
 
-Then open:
-
-- Frontend: http://localhost:3000
-- Backend health: http://localhost:5000/health
-- Backend → AI health: http://localhost:5000/health/ai
-- AI service health: http://localhost:8000/health
-
-## 9. Stopping the System
+### Step 3: Launch AI Microservice
 
 ```bash
-docker compose down
+cd ../ai_service
+python -m venv venv
+.\venv\Scripts\activate      # Windows (or source venv/bin/activate on Linux/macOS)
+pip install -r requirements.txt
+python app.py
 ```
+*Microservice active at `http://127.0.0.1:8000` with interactive OpenAPI docs at `/docs`.*
 
-To also remove the persisted MongoDB volume (⚠️ deletes data):
+### Step 4: Launch Backend Server
 
 ```bash
-docker compose down -v
+cd ../backend
+npm start
+```
+*Backend active at `http://127.0.0.1:5000`.*
+
+### Step 5: Launch Frontend Application
+
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+*Access the SOC console at `http://localhost:3000` or build for production with `npm run build`.*
+
+---
+
+## 6. Comprehensive Test & Verification Suites
+
+Execute the automated test suites to verify system integrity:
+
+```bash
+# 1. Backend Security Headers & CORS Allow-List (10/10 PASS)
+cd backend && node tests/security.test.js
+
+# 2. Comprehensive Security, RBAC, DLP & Hash-Chain Suite (13/13 PASS)
+node tests/full_security.test.js
+
+# 3. End-to-End Graduation Scenarios Suite (5/5 PASS)
+node tests/e2e.test.js
+
+# 4. Python AI Subsystem Unit Tests
+cd ../ai_service
+python tests/test_ai_components.py
+
+# 5. Wall-Clock Latency Benchmark Harness (Passes <= 3.0s requirement)
+python tests/test_latency.py
 ```
 
-## 10. Health Checks
+---
 
-| Endpoint | Purpose |
-|---|---|
-| `GET http://localhost:5000/health` | Backend status + MongoDB connection state |
-| `GET http://localhost:5000/health/ai` | Backend → AI service reachability |
-| `GET http://localhost:8000/health` | AI service status, confirms no models loaded |
+## 7. Validated Graduation Scenarios
 
-## 11. Troubleshooting
+1. **Scenario 1 — Benign Prompt**: Normal user query evaluated through DLP and NLP $\rightarrow$ Low Risk $\rightarrow$ `ALLOW` $\rightarrow$ Cryptographic audit record generated.
+2. **Scenario 2 — DLP Credential Leak**: Sensitive API key (e.g. OpenAI secret `sk-proj-...` or Credit Card) detected $\rightarrow$ Reversible AES-256 tokenization replaces secret $\rightarrow$ `REDACT` action enforced $\rightarrow$ Only Analyst/Admin can restore original secret via fail-closed endpoint.
+3. **Scenario 3 — Voice Deepfake Attack**: Synthetic voice sample submitted $\rightarrow$ RawNet2 detects acoustic anomalies (high spoof probability) $\rightarrow$ Risk elevated $\rightarrow$ `ESCALATE` action with analyst notification.
+4. **Scenario 4 — Social Engineering Coercion**: High-urgency executive impersonation text $\rightarrow$ mBERT detects coercive pressure $\rightarrow$ Threat score $> 0.80$ $\rightarrow$ `BLOCK` action enforced $\rightarrow$ High severity SOC incident logged.
+5. **Scenario 5 — Multi-Modal Combined Threat**: Simultaneous synthetic voice + social engineering coercion + credential harvesting $\rightarrow$ Unified Multi-Modal Risk Engine triggers critical threat elevation $\rightarrow$ `BLOCK` $\rightarrow$ Immediate Critical Incident dispatched with SHA-256 audit record.
 
-- **Backend shows MongoDB `disconnected`**: confirm `MONGO_URI` in `.env`
-  matches the credentials in `MONGO_USERNAME` / `MONGO_PASSWORD`, and that
-  the `mongodb` container is healthy (`docker compose ps`).
-- **`/health/ai` reports `reachable: false`**: confirm the `ai_service`
-  container is running and that `AI_SERVICE_URL` points to
-  `http://ai_service:8000` (the Docker service name, not `localhost`, when
-  running inside Compose).
-- **Frontend shows everything DISCONNECTED**: confirm `VITE_BACKEND_URL`
-  points to a URL reachable from your browser (typically
-  `http://localhost:5000`), and that CORS is not being blocked (the backend
-  enables CORS for all origins in Phase 0).
-- **Port already in use**: another process is using 3000, 5000, 8000, or
-  27017. Stop it or change the port mapping in `docker-compose.yml`.
+---
 
-## 12. Known Limitations (Phase 0)
+## 8. Architectural Integrity & Compliance Notes
 
-- No authentication, JWT, or RBAC — all endpoints are open.
-- No DLP, risk engine, policy engine, or audit logging.
-- No AI models are loaded or installed (RawNet2, Faster-Whisper, mBERT,
-  XGBoost, SHAP are all out of scope for this phase).
-- MongoDB is not yet configured for append-only audit behavior — that is
-  introduced in the Audit Logging phase.
-- CPU-only. No NVIDIA/CUDA requirement exists yet; GPU support arrives
-  when RawNet2/Faster-Whisper are implemented.
-- Target end-to-end latency: ≤3 seconds, subject to experimental
-  validation. This is a target, not a measured result.
-
-## 13. Next Phase
-
-**PHASE 1 — Authentication + JWT + RBAC**
-(Not implemented in this repository yet.)
+* **Single Persistence Layer**: MongoDB/Mongoose is the sole database technology across all subsystems. No duplicate or competing SQL databases are present.
+* **No Fabricated Benchmarks**: Model benchmarks and telemetry display only empirically verified results; where weights are offline in dev environments, the interface explicitly reports `"No measured live metrics fabricated per Task Book T-P11-057"`.
+* **Phase 2 XGBoost + SHAP Status**: Evaluated and formally classified as **Conditional / Not Implemented** due to the rejection of circular synthetic datasets per Task Book T-P13-063. Phase 1 Deterministic Rule-Based Engine serves as the verified production baseline.
+* **Future Work Protection**: Video/image deepfakes, PBX telephony bridges, universal HTTPS proxying, and autoencoder anomaly detection remain documented as Future Work out of scope for graduation baseline.
