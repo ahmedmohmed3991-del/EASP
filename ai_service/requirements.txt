@@ -1,0 +1,8 @@
+# EASP AI Service - Phase 0 dependencies
+# Infrastructure only. No AI/ML models (RawNet2, Faster-Whisper, mBERT,
+# XGBoost, SHAP, etc.) are installed in this phase.
+
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.4
+python-dotenv==1.0.1
