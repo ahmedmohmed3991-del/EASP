@@ -1,0 +1,6 @@
+{
+  "urgency": 0.9,
+  "authority_impersonation": 0.45,
+  "credential_request": 0.3,
+  "payment_request": 0.9
+}
